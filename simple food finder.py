@@ -1,20 +1,11 @@
-# %% initialization
-
-print (" type the ingredients that you have available. acceptable choices are : dough , cheese , meat , tomato sauce , pasta , bread. please type the exact same spelling spaces included or result won't be valid. No Capital letters. system can take 3 ingredients ")
-
+# In[]:
 recepies = {
 	"Pizza" : ['tomato sauce','cheese','dough'],
 	"Red pasta":['meat','pasta','tomato sauce'],
 	"hamburger":['bread','cheese','meat']
 }
 
-for recepie in recepies:
-    print(recepies[recepie])
-
-
-
-
-
+# In[]:
 input_list=[]
 
 msg=""
@@ -23,9 +14,44 @@ while True:
 	if msg=="done":
 		break
 	input_list.append(msg)
-for recepie in recepies:
-	if set(recepies[recepie]).issubset(input_list):
-		print(f"\nYou can make {recepie}!")
-	elif set(recepies[recepie]).intersection(input_list):
-		print(f"\nyou can make {recepie} but need to buy: ")
-		print(*[f'{item},' for item in recepies[recepie] if item not in input_list], sep=' ')
+    
+# In[]:
+
+    
+
+def searchFood(input_list):
+    result_complete_recepie = []
+    result_incomplete_recepie = []
+    result_items = []
+    
+    for recepie in recepies:
+        if set(recepies[recepie]).issubset(input_list):
+            print(f"\nYou can make {recepie}!")
+            result_complete_recepie.append(recepie)
+        elif set(recepies[recepie]).intersection(input_list):
+            print(f"\nyou can make {recepie} but need to buy: ")
+            items = [item for item in recepies[recepie] if item not in input_list]
+            print(*[f'{item},' for item in recepies[recepie] if item not in input_list], sep=' ')
+            result_incomplete_recepie.append( recepie)
+            result_items.append(items)
+    return result_complete_recepie,result_incomplete_recepie, result_items
+      
+# In[]:      
+searchFood(input_list)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
