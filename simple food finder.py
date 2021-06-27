@@ -1,5 +1,9 @@
 # In[]:
-from fuzzywuzzy import fuzz
+# from fuzzywuzzy import fuzz
+# from fuzzywuzzy import process
+import uuid
+
+
 recepies = {
 	"Pizza" : ['tomato sauce','cheese','dough'],
 	"Red pasta":['meat','pasta','tomato sauce'],
@@ -11,56 +15,31 @@ input_list=[]
 
 msg=""
 while True:
-    msg =input("\nEnter ingredient: ")
-    msg=msg.lower()
-    if msg=="done":
-        break
-    input_list.append(msg)
-    
-# In[]:
+	msg =input("\nEnter ingredient: ")
+	if msg=="done":
+		break
+	input_list.append(msg)
 
-    
-
+# In[]
 def searchFood(input_list):
-    result_complete_recepie = []
-    result_incomplete_recepie = []
-    result_items = []
-    
+    results={'Complete Foods':{},'Incomplete Foods':{}}
+
     for recepie in recepies:
-        partial_ratio = fuzz.partial_ratio(recepies[recepie](),input_list)
-        if set(recepies[recepie]).issubset(input_list) and partial_ratio>80:
-            #print(f"\nYou can make {recepie}!")
-            result_complete_recepie.append(recepie)
-        elif set(recepies[recepie]).intersection(input_list) and partial_ratio>80:
-            #print(f"\nyou can make {recepie} but need to buy: ")
+        # partial_ratio=fuzz.partial_ratio(recepies[recepie],input_list[j].lower())
+        if set(recepies[recepie]).issubset(input_list): #and partial_ratio > 80:
+            results['Complete Foods'].update({recepie :{ 'id': uuid.uuid4()}})
+        elif set(recepies[recepie]).intersection(input_list):
             items = [item for item in recepies[recepie] if item not in input_list]
-            #print(*[f'{item},' for item in recepies[recepie] if item not in input_list], sep=' ')
-            result_incomplete_recepie.append( recepie)
-            result_items.append(items)
-    return result_complete_recepie,result_incomplete_recepie, result_items
+            results['Incomplete Foods'].update({recepie:{'Items':items, 'id': uuid.uuid4()}})
+    return results
       
 # In[]:    
-x=searchFood(input_list)
-definit_result=x[0]
-incomplete_results={}
+results =searchFood(input_list)
 
+for food in results['Complete Foods'].keys():
+    print(f'You can make {food} !!!!')
 
-def Convert(x):
-    for i in x:
-        j=0
-        incomplete_results [x[j+1][j]] = x[j+2][j] 
-        incomplete_results [x[j+1][j+1]]= x[j+2][j+1]
-        j=j+1
-    return incomplete_results
-         
-print(Convert(x))
-
-
-
-
-
-
-
-
+for food in results['Incomplete Foods'].keys():
+    print(f'You can make {food} but you need to buy {results["Incomplete Foods"][food]["Items"]}')
 
 
