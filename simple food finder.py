@@ -37,8 +37,7 @@ def searchFood(input_list):
     return result_complete_recepie,result_incomplete_recepie, result_items
       
 # In[]:      
-searchFood(input_list)
-
+x=searchFood(input_list)
 
 
 
