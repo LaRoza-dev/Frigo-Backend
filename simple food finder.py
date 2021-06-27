@@ -1,6 +1,5 @@
 # In[]:
 from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
 recepies = {
 	"Pizza" : ['tomato sauce','cheese','dough'],
 	"Red pasta":['meat','pasta','tomato sauce'],
@@ -12,10 +11,11 @@ input_list=[]
 
 msg=""
 while True:
-	msg =input("\nEnter ingredient: ")
-	if msg=="done":
-		break
-	input_list.append(msg)
+    msg =input("\nEnter ingredient: ")
+    msg=msg.lower()
+    if msg=="done":
+        break
+    input_list.append(msg)
     
 # In[]:
 
@@ -27,13 +27,11 @@ def searchFood(input_list):
     result_items = []
     
     for recepie in recepies:
-        j=0
-        partial_ratio=fuzz.partial_ratio(recepies[recepie],input_list[j].lower())
-        j=j+1
-        if set(recepies[recepie]).issubset(input_list) and partial_ratio > 80:
+        partial_ratio = fuzz.partial_ratio(recepies[recepie](),input_list)
+        if set(recepies[recepie]).issubset(input_list) and partial_ratio>80:
             #print(f"\nYou can make {recepie}!")
             result_complete_recepie.append(recepie)
-        elif set(recepies[recepie]).intersection(input_list):
+        elif set(recepies[recepie]).intersection(input_list) and partial_ratio>80:
             #print(f"\nyou can make {recepie} but need to buy: ")
             items = [item for item in recepies[recepie] if item not in input_list]
             #print(*[f'{item},' for item in recepies[recepie] if item not in input_list], sep=' ')
