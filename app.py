@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 
-from app.server.routes.recipe import router as recipeRouter
+from routes.recipe import recipe_router as recipeRouter
 
 app = FastAPI()
 
-app.include_router(recipeRouter, tags=["recipe"], prefix="/recipe")
+app.include_router(recipeRouter, tags=["Recipe"], prefix="/recipe")
 
 
 @app.get("/", tags=["Root"])
