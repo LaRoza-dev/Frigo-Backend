@@ -13,6 +13,7 @@ class RecipeSchema(BaseModel):
     ingredients: List[str] = Field(...)
     cook_steps: List[str] = Field(...)
     nutritions: Dict[str, str] = Field(...)
+    user_id: Optional[str] = Field(...)
 
     class Config:
         schema_extra = {
@@ -43,7 +44,8 @@ class RecipeSchema(BaseModel):
                     "fat": "17g",
                     "saturates": "3g",
                     "carbs": "50g"
-                }
+                },
+                "user_id":"60fxxxxxxxxxxx7812"
             }
         }
 
@@ -58,6 +60,7 @@ class UpdateRecipeModel(BaseModel):
     ingredients: Optional[List[str]]
     cook_steps: Optional[List[str]]
     nutritions: Optional[Dict[str,str]]
+    user_id:Optional[str]
 
     class Config:
         schema_extra = {
@@ -88,7 +91,8 @@ class UpdateRecipeModel(BaseModel):
                     "fat": "50g",
                     "saturates": "9g",
                     "carbs": "150g"
-                }
+                },
+                "user_id":"60fxxxxxxxxxxx7812"
             }
         }
 

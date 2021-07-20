@@ -1,7 +1,7 @@
 import motor.motor_asyncio
 from bson.objectid import ObjectId
 from decouple import config
-
+from typing import Optional
 from .database_helper import user_helper, admin_helper
 
 
@@ -32,8 +32,11 @@ async def add_user(user_data: dict) -> dict:
     return user_helper(new_user)
 
 
-async def retrieve_user(id: str) -> dict:
-    user = await user_collection.find_one({"_id": ObjectId(id)})
+async def retrieve_user(id:str=None,email:str=None) -> dict:
+    if email:
+        user = await user_collection.find_one({"email": email})    
+    else:
+        user = await user_collection.find_one({"_id": ObjectId(id)})
     if user:
         return user_helper(user)
 

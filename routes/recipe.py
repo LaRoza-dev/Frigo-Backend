@@ -1,5 +1,11 @@
-from fastapi import APIRouter, Body
+from auth.jwt_handler import decodeJWT
+from fastapi import APIRouter, Body,Header
+
 from fastapi.encoders import jsonable_encoder
+from typing import Optional
+
+
+
 
 from database.recipe_database import (
     add_recipe,
@@ -7,6 +13,10 @@ from database.recipe_database import (
     retrieve_recipe,
     retrieve_recipes,
     update_recipe,
+)
+
+from database.user_database import (
+    retrieve_user
 )
 from models.recipe import (
     ErrorResponseModel,
@@ -17,16 +27,22 @@ from models.recipe import (
 
 recipe_router = APIRouter()
 
+
 @recipe_router.post("/", response_description="Recipe data added into the database")
-async def add_recipe_data(recipe: RecipeSchema = Body(...)):
+async def add_recipe_data(recipe: RecipeSchema = Body(...),authorization:Optional[str]=Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    user_id = (await retrieve_user(email=token_data['user_id']))['id']
+    recipe.user_id = user_id
     recipe = jsonable_encoder(recipe)
     new_recipe = await add_recipe(recipe)
     return ResponseModel(new_recipe, "Recipe added successfully.")
 
 
 @recipe_router.get("/", response_description="Recipes retrieved")
-async def get_recipes():
-    recipes = await retrieve_recipes()
+async def get_recipes(authorization:Optional[str]=Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    user_id = (await retrieve_user(email=token_data['user_id']))['id']
+    recipes = await retrieve_recipes(user_id)
     if recipes:
         return ResponseModel(recipes, "Recipes data retrieved successfully")
     return ResponseModel(recipes, "Empty list returned")

@@ -12,7 +12,8 @@ def recipe_helper(recipe) -> dict:
         "url": recipe["url"],
         "ingredients": recipe["ingredients"],
         "cook_steps": recipe["cook_steps"],
-        "nutritions": recipe["nutritions"]
+        "nutritions": recipe["nutritions"],
+        "user_id":recipe["user_id"]
     }
 
 
