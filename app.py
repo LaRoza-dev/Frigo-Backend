@@ -12,8 +12,8 @@ token_listener = JWTBearer()
 
 app.include_router(recipeRouter, tags=["Recipe"], prefix="/recipe", dependencies=[Depends(token_listener)])
 app.include_router(AdminRouter, tags=["Administrator"], prefix="/admin")
-app.include_router(UserLoginRouter, tags=["User Signup and Login"], prefix="/userLogin")
-app.include_router(UserRouter, tags=["Users"], prefix="/user", dependencies=[Depends(token_listener)])
+app.include_router(UserLoginRouter, tags=["User Signup and Login"])
+app.include_router(UserRouter, tags=["Users"], prefix="/users", dependencies=[Depends(token_listener)])
 
 
 @app.get("/", tags=["Root"])

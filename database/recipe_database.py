@@ -2,9 +2,6 @@ import motor.motor_asyncio
 from bson.objectid import ObjectId
 from decouple import config
 
-from auth.jwt_handler import decodeJWT
-from fastapi.security import HTTPBasicCredentials
-
 from .database_helper import recipe_helper
 
 

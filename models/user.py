@@ -7,13 +7,16 @@ class UserModel(BaseModel):
     fullname: str = Field(...)
     email: EmailStr = Field(...)
     password: str = Field(...)
+    is_admin: bool=False
+    
+    
 
     class Config:
         schema_extra = {
             "example": {
                 "fullname": "Mehdi Nurullah",
                 "email": "mehdi@laroza.dev",
-                "password": "password123"
+                "password": "password123",
             }
         }
 
@@ -21,16 +24,14 @@ class UserModel(BaseModel):
 class UpdateUserModel(BaseModel):
     fullname: Optional[str]
     email: Optional[EmailStr]
-    course_of_study: Optional[str]
-    year: Optional[int]
-    gpa: Optional[float]
-
+    password: Optional[str]
+    is_admin: Optional[bool]
     class Config:
         schema_extra = {
             "example": {
                 "fullname": "Mehdi Nurullah",
                 "email": "mehdi@laroza.dev",
-                "password": "password456"
+                "password": "password456",
             }
         }
 

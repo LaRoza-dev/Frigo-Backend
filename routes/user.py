@@ -13,7 +13,7 @@ user_login_router = APIRouter()
 hash_helper = CryptContext(schemes=["bcrypt"])
 
 
-@user_login_router.post("/", response_description="User data added into the database")
+@user_login_router.post("/register", response_description="User data added into the database")
 async def add_user_data(user: UserModel = Body(...)):
     user_exists = await user_collection.find_one({"email":  user.email}, {"_id": 0})
     if(user_exists):

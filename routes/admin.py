@@ -1,12 +1,16 @@
-from fastapi import Body, APIRouter
+from fastapi import Body, APIRouter,Header,Depends
+from typing import Optional
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPBasicCredentials
 from passlib.context import CryptContext
 
-from database.user_database import admin_collection
-from auth.jwt_handler import signJWT
-from database.user_database import add_admin
-from models.admin import AdminModel
+from database.user_database import user_collection
+from auth.jwt_handler import signJWT,decodeJWT
+from database.user_database import add_admin,retrieve_user
+from models.user import UserModel
+
+from auth.jwt_bearer import JWTBearer
+token_listener = JWTBearer()
 
 admin_router = APIRouter()
 
@@ -15,23 +19,31 @@ hash_helper = CryptContext(schemes=["bcrypt"])
 @admin_router.post("/login")
 async def admin_login(admin_credentials: HTTPBasicCredentials = Body(...)):
     # NEW CODE
-    admin_user = await admin_collection.find_one({"email": admin_credentials.username}, {"_id": 0})
+    admin_user = await user_collection.find_one({"email": admin_credentials.username})
     if (admin_user):
         password = hash_helper.verify(
             admin_credentials.password, admin_user["password"])
-        if (password):
-            return signJWT(admin_credentials.username)
+        if (password and admin_user['is_admin']):
+            print('sign',signJWT(admin_credentials.username,admin_user['is_admin']))
+            return signJWT(admin_credentials.username,admin_user['is_admin'])
 
         return "Incorrect email or password"
 
     return "Incorrect email or password"
 
-@admin_router.post("/")
-async def admin_signup(admin: AdminModel = Body(...)):
-    admin_exists = await admin_collection.find_one({"email":  admin.email}, {"_id": 0})
-    if(admin_exists):
-        return "Email already exists"
+@admin_router.post("/regsiter", dependencies=[Depends(token_listener)])
+async def admin_signup(admin: UserModel = Body(...),authorization:Optional[str]=Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    print('is_admin',await retrieve_user(email=token_data['user_id']))
+    is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
+    if is_admin:
+        admin_exists = await user_collection.find_one({"email":  admin.email})
     
-    admin.password = hash_helper.encrypt(admin.password)
-    new_admin = await add_admin(jsonable_encoder(admin))
-    return new_admin
+        if(admin_exists):
+            return "Email already exists"
+        
+        
+        admin.password = hash_helper.encrypt(admin.password)
+        new_admin = await add_admin(jsonable_encoder(admin))
+        return new_admin
+    return 'Permission denied'
