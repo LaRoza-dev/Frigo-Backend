@@ -49,17 +49,21 @@ async def get_recipes(authorization:Optional[str]=Header(None)):
 
 
 @recipe_router.get("/{id}", response_description="Recipe data retrieved")
-async def get_recipe_data(id):
-    recipe = await retrieve_recipe(id)
+async def get_recipe_data(id,authorization:Optional[str]=Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    user_id = (await retrieve_user(email=token_data['user_id']))['id']
+    recipe = await retrieve_recipe(id,user_id)
     if recipe:
         return ResponseModel(recipe, "Recipe data retrieved successfully")
     return ErrorResponseModel("An error occurred.", 404, "Recipe doesn't exist.")
 
 
 @recipe_router.put("/{id}")
-async def update_recipe_data(id: str, req: UpdateRecipeModel = Body(...)):
+async def update_recipe_data(id: str, req: UpdateRecipeModel = Body(...),authorization:Optional[str]=Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    user_id = (await retrieve_user(email=token_data['user_id']))['id']
     req = {k: v for k, v in req.dict().items() if v is not None}
-    updated_recipe = await update_recipe(id, req)
+    updated_recipe = await update_recipe(id, req,user_id)
     if updated_recipe:
         return ResponseModel(
             "Recipe with ID: {} name update is successful".format(id),
@@ -73,8 +77,10 @@ async def update_recipe_data(id: str, req: UpdateRecipeModel = Body(...)):
 
 
 @recipe_router.delete("/{id}", response_description="Recipe data deleted from the database")
-async def delete_recipe_data(id: str):
-    deleted_recipe = await delete_recipe(id)
+async def delete_recipe_data(id: str,authorization:Optional[str]=Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    user_id = (await retrieve_user(email=token_data['user_id']))['id']
+    deleted_recipe = await delete_recipe(id,user_id)
     if deleted_recipe:
         return ResponseModel(
             "Recipe with ID: {} removed".format(id), "Recipe deleted successfully"

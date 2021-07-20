@@ -60,7 +60,6 @@ class UpdateRecipeModel(BaseModel):
     ingredients: Optional[List[str]]
     cook_steps: Optional[List[str]]
     nutritions: Optional[Dict[str,str]]
-    user_id:Optional[str]
 
     class Config:
         schema_extra = {
@@ -92,7 +91,7 @@ class UpdateRecipeModel(BaseModel):
                     "saturates": "9g",
                     "carbs": "150g"
                 },
-                "user_id":"60fxxxxxxxxxxx7812"
+                
             }
         }
 
