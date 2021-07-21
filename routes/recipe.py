@@ -28,7 +28,11 @@ recipe_router = APIRouter()
 @recipe_router.post("/", response_description="Recipe data added into the database")
 async def add_recipe_data(recipe: RecipeSchema = Body(...),authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    user_id = (await retrieve_user(email=token_data['user_id']))['id']
+    is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
+    if is_admin:
+        user_id = "1"
+    else:
+        user_id = (await retrieve_user(email=token_data['user_id']))['id']
     recipe.user_id = user_id
     recipe = jsonable_encoder(recipe)
     new_recipe = await add_recipe(recipe)
