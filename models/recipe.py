@@ -13,7 +13,7 @@ class RecipeSchema(BaseModel):
     ingredients: List[str] = Field(...)
     cook_steps: List[str] = Field(...)
     nutritions: Dict[str, str] = Field(...)
-    user_id: Optional[str] = Field(...)
+    user_id: Optional[str]
 
     class Config:
         schema_extra = {
@@ -44,8 +44,7 @@ class RecipeSchema(BaseModel):
                     "fat": "17g",
                     "saturates": "3g",
                     "carbs": "50g"
-                },
-                "user_id":"60fxxxxxxxxxxx7812"
+                }
             }
         }
 

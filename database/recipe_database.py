@@ -15,10 +15,14 @@ recipe_collection = database.get_collection("recipes_collection")
 
 
 # Retrieve all recipes present in the database
-async def retrieve_recipes(user_id):
+async def retrieve_recipes(user_id,is_admin=None):
     recipes = []
-    async for recipe in recipe_collection.find({"$or":[{ "user_id":user_id},{"user_id":"1"}]}):
-        recipes.append(recipe_helper(recipe))
+    if is_admin:
+        async for recipe in recipe_collection.find({}):
+            recipes.append(recipe_helper(recipe))
+    else:
+        async for recipe in recipe_collection.find({"$or":[{ "user_id":user_id},{"user_id":"1"}]}):
+            recipes.append(recipe_helper(recipe))
     return recipes
 
 

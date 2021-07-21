@@ -20,6 +20,20 @@ class UserModel(BaseModel):
             }
         }
 
+class UserPassModel(BaseModel):
+    email: EmailStr = Field(...)
+    password: str = Field(...)
+    
+    
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "email": "mehdi@laroza.dev",
+                "password": "password123",
+            }
+        }
+
 
 class UpdateUserModel(BaseModel):
     fullname: Optional[str]

@@ -38,8 +38,9 @@ async def add_recipe_data(recipe: RecipeSchema = Body(...),authorization:Optiona
 @recipe_router.get("/", response_description="Recipes retrieved")
 async def get_recipes(authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
+    is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
     user_id = (await retrieve_user(email=token_data['user_id']))['id']
-    recipes = await retrieve_recipes(user_id)
+    recipes = await retrieve_recipes(user_id,is_admin)
     if recipes:
         return ResponseModel(recipes, "Recipes data retrieved successfully")
     return ResponseModel(recipes, "Empty list returned")

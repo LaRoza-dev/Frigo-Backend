@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Body,Header
 from fastapi.encoders import jsonable_encoder
 from passlib.context import CryptContext
-from fastapi.security import HTTPBasicCredentials
 
 from database.user_database import *
 from models.user import *
@@ -15,7 +14,7 @@ hash_helper = CryptContext(schemes=["bcrypt"])
 
 @user_login_router.post("/register", response_description="User data added into the database")
 async def add_user_data(user: UserModel = Body(...)):
-    user_exists = await user_collection.find_one({"email":  user.email}, {"_id": 0})
+    user_exists = await user_collection.find_one({"email":  user.email})
     if(user_exists):
         return "Email already exists"
     user.password = hash_helper.encrypt(user.password)
@@ -25,14 +24,14 @@ async def add_user_data(user: UserModel = Body(...)):
 
 
 @user_login_router.post("/login")
-async def user_login(user_credentials: HTTPBasicCredentials = Body(...)):
+async def user_login(user_credentials: UserPassModel = Body(...)):
     # NEW CODE
-    user = await user_collection.find_one({"email": user_credentials.username}, {"_id": 0})
+    user = await user_collection.find_one({"email": user_credentials.email})
     if (user):
         password = hash_helper.verify(
             user_credentials.password, user["password"])
         if (password):
-            return signJWT(user_credentials.username)
+            return signJWT(user_credentials.email)
 
         return "Incorrect email or password"
 

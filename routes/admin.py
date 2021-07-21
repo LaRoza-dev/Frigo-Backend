@@ -1,13 +1,12 @@
 from fastapi import Body, APIRouter,Header,Depends
 from typing import Optional
 from fastapi.encoders import jsonable_encoder
-from fastapi.security import HTTPBasicCredentials
 from passlib.context import CryptContext
 
 from database.user_database import user_collection
 from auth.jwt_handler import signJWT,decodeJWT
 from database.user_database import add_admin,retrieve_user
-from models.user import UserModel
+from models.user import UserModel, UserPassModel
 
 from auth.jwt_bearer import JWTBearer
 token_listener = JWTBearer()
@@ -17,14 +16,14 @@ admin_router = APIRouter()
 hash_helper = CryptContext(schemes=["bcrypt"])
 
 @admin_router.post("/login")
-async def admin_login(admin_credentials: HTTPBasicCredentials = Body(...)):
+async def admin_login(admin_credentials: UserPassModel = Body(...)):
     # NEW CODE
-    admin_user = await user_collection.find_one({"email": admin_credentials.username})
+    admin_user = await user_collection.find_one({"email": admin_credentials.email})
     if (admin_user):
         password = hash_helper.verify(
             admin_credentials.password, admin_user["password"])
         if (password and admin_user['is_admin']):
-            return signJWT(admin_credentials.username,admin_user['is_admin'])
+            return signJWT(admin_credentials.email,admin_user['is_admin'])
 
         return "Incorrect email or password"
 
