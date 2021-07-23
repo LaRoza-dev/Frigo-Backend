@@ -1,13 +1,18 @@
 import motor.motor_asyncio
 from bson.objectid import ObjectId
 from decouple import config
-
+from main import stage
 from .database_helper import recipe_helper
 
 
-MONGO_DETAILS = config('MONGO_DETAILS')
+if stage == "production":
+    MONGO_DETAILS = config('MONGO_DETAILS_PROD')
+elif stage == "development":
+    MONGO_DETAILS = config('MONGO_DETAILS_DEV')
+else:
+    print("WRONG MONGO ENV")
 
-client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
+client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS, tls=True, tlsAllowInvalidCertificates=True)
 
 database = client.recipes
 
