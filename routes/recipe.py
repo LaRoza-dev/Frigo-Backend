@@ -10,6 +10,7 @@ from database.recipe_database import (
     retrieve_recipe,
     retrieve_recipes,
     update_recipe,
+    retrieve_recipes_by_ingredients
 )
 
 from database.user_database import (
@@ -45,6 +46,16 @@ async def get_recipes(authorization:Optional[str]=Header(None)):
     is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
     user_id = (await retrieve_user(email=token_data['user_id']))['id']
     recipes = await retrieve_recipes(user_id,is_admin)
+    if recipes:
+        return ResponseModel(recipes, "Recipes data retrieved successfully")
+    return ResponseModel(recipes, "Empty list returned")
+
+@recipe_router.get("/search/{query}", response_description="Recipes retrieved")
+async def get_recipes_by_ingredients(query,authorization:Optional[str]=Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
+    user_id = (await retrieve_user(email=token_data['user_id']))['id']
+    recipes = await retrieve_recipes_by_ingredients(user_id,is_admin,query)
     if recipes:
         return ResponseModel(recipes, "Recipes data retrieved successfully")
     return ResponseModel(recipes, "Empty list returned")

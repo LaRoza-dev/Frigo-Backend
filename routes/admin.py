@@ -17,7 +17,6 @@ hash_helper = CryptContext(schemes=["bcrypt"])
 
 @admin_router.post("/login")
 async def admin_login(admin_credentials: UserPassModel = Body(...)):
-    # NEW CODE
     admin_user = await user_collection.find_one({"email": admin_credentials.email})
     if (admin_user):
         password = hash_helper.verify(

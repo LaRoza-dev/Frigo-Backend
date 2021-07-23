@@ -25,6 +25,29 @@ async def retrieve_recipes(user_id,is_admin=None):
             recipes.append(recipe_helper(recipe))
     return recipes
 
+# Retrieve all recipes present in the database
+async def retrieve_recipes_by_ingredients(user_id,is_admin=None,query=None):
+    recipes = []
+    # async for recipe in recipe_collection.find({"ingredients":{'$regex':query}}):
+    #     recipes.append(recipe_helper(recipe))
+    #return recipes
+    if is_admin:
+        async for recipe in recipe_collection.find({"ingredients":{'$regex':query}}):
+            recipes.append(recipe_helper(recipe))
+    else:
+        async for recipe in recipe_collection.find({
+
+            "$and":[
+                {"$or":[
+                        {"user_id":user_id},
+                        {"user_id":"1"}
+                        ]
+                }
+                ,{"ingredients":{'$regex':f".*{query}.*"}}
+                ]
+            }):
+            recipes.append(recipe_helper(recipe))
+    return recipes
 
 # Add a new recipe into to the database
 async def add_recipe(recipe_data: dict) -> dict:
