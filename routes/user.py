@@ -1,6 +1,11 @@
-from fastapi import APIRouter, Body,Header
+from fastapi import APIRouter, Body,Header, Cookie
 from fastapi.encoders import jsonable_encoder
 from passlib.context import CryptContext
+from starlette.config import Config
+from starlette.requests import Request
+from starlette.responses import HTMLResponse, RedirectResponse
+from authlib.integrations.starlette_client import OAuth, OAuthError
+
 
 from database.user_database import *
 from models.user import *
@@ -10,8 +15,69 @@ user_router = APIRouter()
 user_login_router = APIRouter()
 
 hash_helper = CryptContext(schemes=["bcrypt"])
+#-------------------------------------------------------------------------------------------------
+config = Config('.env')
+oauth = OAuth(config)
+
+google_route = APIRouter()
+
+CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+oauth.register(
+    name='google',
+    server_metadata_url=CONF_URL,
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
+
+@google_route.get('/')
+async def homepage(request: Request):
+    user = request.session.get('user')
+    token = request.session.get('token')
+    print(user["email"])
+    if user:
+        #return jsonable_encoder(user)
+        db_user = await user_collection.find_one({"email": user["email"]})
+        if (db_user):
+            return signJWT(user["email"])
+        new_user = await add_user(user)
+        return ResponseModel(new_user, "User added successfully.")
+    return RedirectResponse('/google/login')
+
+    
+    # return "Google email not found"
+    # if not user :
+    #     return RedirectResponse('/google/login')
+    # return {"email":user["email"],"fullname":user["name"],"token":token}
+    
 
 
+@google_route.get('/login')
+async def login(request: Request):
+    user = request.session.get('user')
+    if user:
+        return RedirectResponse('/google')
+    redirect_uri = request.url_for('auth')
+    return await oauth.google.authorize_redirect(request, redirect_uri) 
+
+    
+
+
+
+@google_route.get('/auth')
+async def auth(request: Request):
+    try:
+        token = await oauth.google.authorize_access_token(request)   
+    except OAuthError as error:
+        return HTMLResponse(error.error)
+    user = await oauth.google.parse_id_token(request, token)
+    request.session['user'] = dict(user)
+    request.session['token'] = dict(token)
+    return RedirectResponse('/google')
+    
+
+
+#-------------------------------------------------------------------------------------------------
 @user_login_router.post("/register", response_description="User data added into the database")
 async def add_user_data(user: UserModel = Body(...)):
     user_exists = await user_collection.find_one({"email":  user.email})
@@ -37,6 +103,7 @@ async def user_login(user_credentials: UserPassModel = Body(...)):
 
     return "Incorrect email or password"
 
+#-------------------------------------------------------------------------------------------------
 
 @user_router.get("/", response_description="Users retrieved")
 async def get_users(authorization:Optional[str]=Header(None)):

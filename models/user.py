@@ -9,7 +9,6 @@ class UserModel(BaseModel):
     password: str = Field(...)
     is_admin: bool=False
     
-    
 
     class Config:
         schema_extra = {
@@ -17,6 +16,19 @@ class UserModel(BaseModel):
                 "fullname": "Mehdi Nurullah",
                 "email": "mehdi@laroza.dev",
                 "password": "password123",
+            }
+        }
+
+class GoogleUserModel(BaseModel):
+    fullname: str = Field(...)
+    email: EmailStr = Field(...)    
+    
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "fullname": "Mehdi Nurullah",
+                "email": "mehdi@laroza.dev",
             }
         }
 
