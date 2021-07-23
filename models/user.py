@@ -19,18 +19,6 @@ class UserModel(BaseModel):
             }
         }
 
-class GoogleUserModel(BaseModel):
-    fullname: str = Field(...)
-    email: EmailStr = Field(...)    
-    
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "fullname": "Mehdi Nurullah",
-                "email": "mehdi@laroza.dev",
-            }
-        }
 
 class UserPassModel(BaseModel):
     email: EmailStr = Field(...)

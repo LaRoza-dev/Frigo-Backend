@@ -33,49 +33,37 @@ oauth.register(
 @google_route.get('/')
 async def homepage(request: Request):
     user = request.session.get('user')
-    token = request.session.get('token')
-    print(user["email"])
     if user:
-        #return jsonable_encoder(user)
         db_user = await user_collection.find_one({"email": user["email"]})
         if (db_user):
             return signJWT(user["email"])
-        new_user = await add_user(user)
+        sign_user = {"fullname":user["name"],"email":user["email"],"is_admin":False}
+        sign_user = jsonable_encoder(sign_user)
+        new_user = await add_user(sign_user)
         return ResponseModel(new_user, "User added successfully.")
     return RedirectResponse('/google/login')
-
-    
-    # return "Google email not found"
-    # if not user :
-    #     return RedirectResponse('/google/login')
-    # return {"email":user["email"],"fullname":user["name"],"token":token}
-    
 
 
 @google_route.get('/login')
 async def login(request: Request):
-    user = request.session.get('user')
-    if user:
-        return RedirectResponse('/google')
+    # user = request.session.get('user')
+    # if user:
+    #     return RedirectResponse('/google')
     redirect_uri = request.url_for('auth')
     return await oauth.google.authorize_redirect(request, redirect_uri) 
-
-    
 
 
 
 @google_route.get('/auth')
 async def auth(request: Request):
     try:
-        token = await oauth.google.authorize_access_token(request)   
+        token = await oauth.google.authorize_access_token(request) 
     except OAuthError as error:
         return HTMLResponse(error.error)
     user = await oauth.google.parse_id_token(request, token)
     request.session['user'] = dict(user)
-    request.session['token'] = dict(token)
     return RedirectResponse('/google')
     
-
 
 #-------------------------------------------------------------------------------------------------
 @user_login_router.post("/register", response_description="User data added into the database")
