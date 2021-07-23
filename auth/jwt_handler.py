@@ -11,8 +11,6 @@ def token_response(token: str):
     }
 
 JWT_SECRET = config('secret')
-GOOGLE_SECRET = config('GOOGLE_CLIENT_SECRET')
-GOOGLE_ID = config('GOOGLE_CLIENT_ID')
 
 def signJWT(user_id: str,is_admin:bool=None) -> Dict[str, str]:
     # Set the expiry time.
@@ -27,13 +25,6 @@ def signJWT(user_id: str,is_admin:bool=None) -> Dict[str, str]:
 def decodeJWT(token: str) -> dict:
     try:
         decoded_token = jwt.decode(token.encode(), JWT_SECRET, algorithms=["HS256"])
-        return decoded_token if decoded_token['expires'] >= time.time() else None
-    except:
-        return {}
-
-def decodeGoogle(token: str) -> dict:
-    try:
-        decoded_token = jwt.decode(token.encode(), GOOGLE_ID, algorithms=["HS256"])
         return decoded_token if decoded_token['expires'] >= time.time() else None
     except:
         return {}
