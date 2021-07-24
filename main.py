@@ -13,8 +13,10 @@ from decouple import config
 stage = config('stage')
 if stage == "development":
     app = FastAPI()
+    print("You are in the development environment")
 elif stage == "production":
     app = FastAPI(docs_url=None, redoc_url=None)
+    print("You are in the production environment")
 else:
     print("stage in not define")
 
@@ -27,9 +29,6 @@ app.include_router(AdminRouter, tags=["Administrators"], prefix="/admin")
 app.include_router(UserLoginRouter, tags=["User Signup and Login"])
 app.include_router(UserRouter, tags=["Users"], prefix="/users", dependencies=[Depends(token_listener)])
 app.include_router(GoogleRouter, tags=["google"], prefix="/google")
-
-
-
 
 @app.get("/", tags=["Root"])
 async def read_root():
