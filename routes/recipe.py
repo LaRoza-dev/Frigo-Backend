@@ -29,7 +29,7 @@ recipe_router = APIRouter()
 @recipe_router.post("/", response_description="Recipe data added into the database")
 async def add_recipe_data(recipe: RecipeSchema = Body(...),authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
+    is_admin = token_data['is_admin']
     if is_admin:
         user_id = "1"
     else:
@@ -43,17 +43,17 @@ async def add_recipe_data(recipe: RecipeSchema = Body(...),authorization:Optiona
 @recipe_router.get("/", response_description="Recipes retrieved")
 async def get_recipes(authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
+    is_admin = token_data['is_admin']
     user_id = (await retrieve_user(email=token_data['user_id']))['id']
     recipes = await retrieve_recipes(user_id,is_admin)
     if recipes:
         return ResponseModel(recipes, "Recipes data retrieved successfully")
     return ResponseModel(recipes, "Empty list returned")
 
-@recipe_router.get("/search/{query}", response_description="Recipes retrieved")
-async def get_recipes_by_ingredients(query,authorization:Optional[str]=Header(None)):
+@recipe_router.post("/search", response_description="Recipes retrieved")
+async def get_recipes_by_ingredients(query:list=Body(...),authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
+    is_admin = token_data['is_admin']
     user_id = (await retrieve_user(email=token_data['user_id']))['id']
     recipes = await retrieve_recipes_by_ingredients(user_id,is_admin,query)
     if recipes:

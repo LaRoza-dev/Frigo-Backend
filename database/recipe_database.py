@@ -2,6 +2,7 @@ import motor.motor_asyncio
 from bson.objectid import ObjectId
 from decouple import config
 from .database_helper import recipe_helper
+import array
 
 stage = config('stage')
 if stage == "development":
@@ -29,11 +30,11 @@ async def retrieve_recipes(user_id,is_admin=None):
             recipes.append(recipe_helper(recipe))
     return recipes
 
-# Retrieve all recipes present in the database
-async def retrieve_recipes_by_ingredients(user_id,is_admin=None,query=None):
+# Retrieve all recipes present in the database which has ingredient list 
+async def retrieve_recipes_by_ingredients(user_id,is_admin=None,query:list=None):
     recipes = []
     if is_admin:
-        async for recipe in recipe_collection.find({"ingredients":{'$regex':query}}):
+        async for recipe in recipe_collection.find({"ingredients":{"$in":query}}):
             recipes.append(recipe_helper(recipe))
     else:
         async for recipe in recipe_collection.find({
@@ -44,7 +45,7 @@ async def retrieve_recipes_by_ingredients(user_id,is_admin=None,query=None):
                         {"user_id":"1"}
                         ]
                 }
-                ,{"ingredients":{'$regex':f".*{query}.*"}}
+                ,{"ingredients":{"$in":query}}
                 ]
             }):
             recipes.append(recipe_helper(recipe))

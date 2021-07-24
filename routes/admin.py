@@ -31,7 +31,7 @@ async def admin_login(admin_credentials: UserPassModel = Body(...)):
 @admin_router.post("/regsiter", dependencies=[Depends(token_listener)])
 async def admin_signup(admin: UserModel = Body(...),authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
+    is_admin = token_data['is_admin']
     if is_admin:
         admin_exists = await user_collection.find_one({"email":  admin.email})
     

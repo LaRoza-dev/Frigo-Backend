@@ -46,9 +46,6 @@ async def homepage(request: Request):
 
 @google_route.get('/login')
 async def login(request: Request):
-    # user = request.session.get('user')
-    # if user:
-    #     return RedirectResponse('/google')
     redirect_uri = request.url_for('auth')
     return await oauth.google.authorize_redirect(request, redirect_uri) 
 
@@ -79,7 +76,6 @@ async def add_user_data(user: UserModel = Body(...)):
 
 @user_login_router.post("/login")
 async def user_login(user_credentials: UserPassModel = Body(...)):
-    # NEW CODE
     user = await user_collection.find_one({"email": user_credentials.email})
     if (user):
         password = hash_helper.verify(
@@ -96,7 +92,7 @@ async def user_login(user_credentials: UserPassModel = Body(...)):
 @user_router.get("/", response_description="Users retrieved")
 async def get_users(authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
+    is_admin = token_data['is_admin']
     if is_admin:
         users = await retrieve_users()
         return ResponseModel(users, "Users data retrieved successfully") \
@@ -109,7 +105,7 @@ async def get_users(authorization:Optional[str]=Header(None)):
 @user_router.get("/{id}", response_description="User data retrieved")
 async def get_user_data(id: str, authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
+    is_admin = token_data['is_admin']
     if is_admin:
         user = await retrieve_user(id)
         return ResponseModel(user, "User data retrieved successfully") \
@@ -121,7 +117,7 @@ async def get_user_data(id: str, authorization:Optional[str]=Header(None)):
 @user_router.delete("/{id}", response_description="User data deleted from the database")
 async def delete_user_data(id: str, authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
+    is_admin = token_data['is_admin']
     if is_admin:
         deleted_user = await delete_user(id)
         return ResponseModel("User with ID: {} removed".format(id), "User deleted successfully") \
@@ -132,7 +128,7 @@ async def delete_user_data(id: str, authorization:Optional[str]=Header(None)):
 @user_router.put("{id}")
 async def update_user(id: str, req: UpdateUserModel = Body(...), authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    is_admin = (await retrieve_user(email=token_data['user_id']))['is_admin']
+    is_admin = token_data['is_admin']
     if is_admin:
         updated_user = await update_user_data(id, req.dict())
         return ResponseModel("User with ID: {} name update is successful".format(id),

@@ -10,15 +10,16 @@ from starlette.middleware.sessions import SessionMiddleware
 from decouple import config
 
 
+
 stage = config('stage')
 if stage == "development":
     app = FastAPI()
-    print("You are in the development environment")
+    print("INFO:     You are in the development environment")
 elif stage == "production":
     app = FastAPI(docs_url=None, redoc_url=None)
-    print("You are in the production environment")
+    print("WARNING:  You are in the PRODUCTION environment !")
 else:
-    print("stage in not define")
+    print("ERROR:   Stage in not define.")
 
 app.add_middleware(SessionMiddleware, secret_key=config("secret"))
 
