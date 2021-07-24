@@ -1,7 +1,6 @@
 import motor.motor_asyncio
 from bson.objectid import ObjectId
 from decouple import config
-# from main import stage
 from .database_helper import user_helper
 
 stage = config('stage')
