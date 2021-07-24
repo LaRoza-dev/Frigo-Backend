@@ -4,14 +4,13 @@ from decouple import config
 # from main import stage
 from .database_helper import user_helper
 
-
 stage = config('stage')
 if stage == "development":
+    MONGO_DETAILS = config('MONGO_DETAILS_DEV')
+elif stage == "production":
     MONGO_DETAILS = config('MONGO_DETAILS_PROD')
 else:
-    MONGO_DETAILS = config('MONGO_DETAILS_DEV')
-# else:
-    # print("WRONG MONGO ENV")
+    print("WRONG MONGO ENV")
 
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS, tls=True, tlsAllowInvalidCertificates=True)
 

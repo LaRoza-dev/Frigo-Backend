@@ -13,8 +13,10 @@ from decouple import config
 stage = config('stage')
 if stage == "development":
     app = FastAPI()
-else:
+elif stage == "production":
     app = FastAPI(docs_url=None, redoc_url=None)
+else:
+    print("stage in not define")
 
 app.add_middleware(SessionMiddleware, secret_key=config("secret"))
 
@@ -32,12 +34,6 @@ app.include_router(GoogleRouter, tags=["google"], prefix="/google")
 @app.get("/", tags=["Root"])
 async def read_root():
     return {"message": "Welcome to this fantastic app!"}
-
-
-@app.get("/*", tags=["Root"])
-async def read_root():
-    return {"message": "Not found"}
-
 
 
 
