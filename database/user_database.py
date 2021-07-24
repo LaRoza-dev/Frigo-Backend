@@ -1,14 +1,13 @@
 import motor.motor_asyncio
 from bson.objectid import ObjectId
 from decouple import config
-from main import stage
 from .database_helper import user_helper
 
-
-if stage == "production":
-    MONGO_DETAILS = config('MONGO_DETAILS_PROD')
-elif stage == "development":
+stage = config('stage')
+if stage == "development":
     MONGO_DETAILS = config('MONGO_DETAILS_DEV')
+elif stage == "production":
+    MONGO_DETAILS = config('MONGO_DETAILS_PROD')
 else:
     print("WRONG MONGO ENV")
 

@@ -1,14 +1,13 @@
 import motor.motor_asyncio
 from bson.objectid import ObjectId
 from decouple import config
-from main import stage
 from .database_helper import recipe_helper
 
-
-if stage == "production":
-    MONGO_DETAILS = config('MONGO_DETAILS_PROD')
-elif stage == "development":
+stage = config('stage')
+if stage == "development":
     MONGO_DETAILS = config('MONGO_DETAILS_DEV')
+elif stage == "production":
+    MONGO_DETAILS = config('MONGO_DETAILS_PROD')
 else:
     print("WRONG MONGO ENV")
 
@@ -33,9 +32,6 @@ async def retrieve_recipes(user_id,is_admin=None):
 # Retrieve all recipes present in the database
 async def retrieve_recipes_by_ingredients(user_id,is_admin=None,query=None):
     recipes = []
-    # async for recipe in recipe_collection.find({"ingredients":{'$regex':query}}):
-    #     recipes.append(recipe_helper(recipe))
-    #return recipes
     if is_admin:
         async for recipe in recipe_collection.find({"ingredients":{'$regex':query}}):
             recipes.append(recipe_helper(recipe))
