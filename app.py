@@ -8,9 +8,9 @@ from routes.admin import admin_router as AdminRouter
 from routes.user import google_route as GoogleRouter
 from starlette.middleware.sessions import SessionMiddleware
 from decouple import config
+from main import stage
 
 
-stage = config('stage')
 if stage == "development":
     app = FastAPI()
 else:
