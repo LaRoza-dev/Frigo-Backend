@@ -10,7 +10,9 @@ from database.recipe_database import (
     retrieve_recipe,
     retrieve_recipes,
     update_recipe,
-    retrieve_recipes_by_ingredients
+    retrieve_recipes_by_ingredients,
+    delete_recipe_admin,
+    update_recipe_admin
 )
 
 from database.user_database import (
@@ -74,9 +76,17 @@ async def get_recipe_data(id,authorization:Optional[str]=Header(None)):
 @recipe_router.put("/{id}")
 async def update_recipe_data(id: str, req: UpdateRecipeModel = Body(...),authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    user_id = (await retrieve_user(email=token_data['user_id']))['id']
-    req = {k: v for k, v in req.dict().items() if v is not None}
-    updated_recipe = await update_recipe(id, req,user_id)
+    is_admin = token_data['is_admin']
+
+    if is_admin:
+        req = {k: v for k, v in req.dict().items() if v is not None}
+        updated_recipe = await update_recipe_admin(id, req)
+
+    else:
+        user_id = (await retrieve_user(email=token_data['user_id']))['id']
+        req = {k: v for k, v in req.dict().items() if v is not None}
+        updated_recipe = await update_recipe(id, req,user_id)
+    
     if updated_recipe:
         return ResponseModel(
             "Recipe with ID: {} name update is successful".format(id),
@@ -92,8 +102,13 @@ async def update_recipe_data(id: str, req: UpdateRecipeModel = Body(...),authori
 @recipe_router.delete("/{id}", response_description="Recipe data deleted from the database")
 async def delete_recipe_data(id: str,authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    user_id = (await retrieve_user(email=token_data['user_id']))['id']
-    deleted_recipe = await delete_recipe(id,user_id)
+    is_admin = token_data['is_admin']
+    if is_admin:
+        deleted_recipe = await delete_recipe_admin(id)
+    else:
+        # return print("token data",await retrieve_user(email=token_data['user_id']))
+        user_id = (await retrieve_user(email=token_data['user_id']))['id']
+        deleted_recipe = await delete_recipe(id,user_id)
     if deleted_recipe:
         return ResponseModel(
             "Recipe with ID: {} removed".format(id), "Recipe deleted successfully"

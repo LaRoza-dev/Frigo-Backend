@@ -80,9 +80,26 @@ async def update_recipe(id: str, data: dict,user_id: str):
         return False
 
 
+async def update_recipe_admin(id: str, data: dict):
+    # Return false if an empty request body is sent.
+    if len(data) < 1:
+        return False
+    recipe = await recipe_collection.find_one({"_id": ObjectId(id)})
+    if recipe:
+        updated_recipe = await recipe_collection.update_one(
+            {"_id": ObjectId(id)}, {"$set": data}
+        )
+        if updated_recipe:
+            return True
+        return False
+
+
 # Delete a recipe from the database
 async def delete_recipe(id: str,user_id: str):
     recipe = await recipe_collection.find_one({"_id": ObjectId(id),"user_id":user_id})
     if recipe:
         await recipe_collection.delete_one({"_id": ObjectId(id)})
         return True
+
+async def delete_recipe_admin(id: str):
+    return await recipe_collection.delete_one({"_id": ObjectId(id)})
