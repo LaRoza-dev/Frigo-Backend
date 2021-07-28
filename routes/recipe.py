@@ -8,6 +8,7 @@ from database.recipe_database import (
     add_recipe,
     delete_recipe,
     retrieve_recipe,
+    retrieve_recipe_name,
     retrieve_recipes,
     update_recipe,
     retrieve_recipes_by_ingredients,
@@ -63,11 +64,20 @@ async def get_recipes_by_ingredients(query:list=Body(...),authorization:Optional
     return ResponseModel(recipes, "Empty list returned")
 
 
-@recipe_router.get("/{id}", response_description="Recipe data retrieved")
+@recipe_router.get("/get_id/{id}", response_description="Recipe data retrieved")
 async def get_recipe_data(id,authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
     user_id = (await retrieve_user(email=token_data['user_id']))['id']
     recipe = await retrieve_recipe(id,user_id)
+    if recipe:
+        return ResponseModel(recipe, "Recipe data retrieved successfully")
+    return ErrorResponseModel("An error occurred.", 404, "Recipe doesn't exist.")
+
+@recipe_router.get("/{name}", response_description="Recipe data retrieved")
+async def get_recipe_name(name,authorization:Optional[str]=Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    user_id = (await retrieve_user(email=token_data['user_id']))['id']
+    recipe = await retrieve_recipe_name(name,user_id)
     if recipe:
         return ResponseModel(recipe, "Recipe data retrieved successfully")
     return ErrorResponseModel("An error occurred.", 404, "Recipe doesn't exist.")

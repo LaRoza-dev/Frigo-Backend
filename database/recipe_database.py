@@ -2,7 +2,7 @@ import motor.motor_asyncio
 from bson.objectid import ObjectId
 from decouple import config
 from .database_helper import recipe_helper
-import array
+import re
 
 stage = config('stage')
 if stage == "development":
@@ -34,11 +34,11 @@ async def retrieve_recipes(user_id,is_admin=None):
 async def retrieve_recipes_by_ingredients(user_id,is_admin=None,query:list=None):
     recipes = []
     if is_admin:
+        query=list(map(lambda recipe: re.compile(f"^.*{recipe}.*$",re.IGNORECASE),query))
         async for recipe in recipe_collection.find({"ingredients":{"$in":query}}):
             recipes.append(recipe_helper(recipe))
     else:
         async for recipe in recipe_collection.find({
-
             "$and":[
                 {"$or":[
                         {"user_id":user_id},
@@ -64,6 +64,10 @@ async def retrieve_recipe(id: str,user_id: str) -> dict:
     if recipe:
         return recipe_helper(recipe)
 
+async def retrieve_recipe_name(name: str,user_id: str) -> dict:
+    recipe = await recipe_collection.find_one({"$or":[{"name": {'$regex': f".*{name}.*","$options":"i"}, "user_id":user_id},{"name":{'$regex': f".*{name}.*","$options":"i"},"user_id":"1"}]})
+    if recipe:
+        return recipe_helper(recipe)
 
 # Update a recipe with a matching ID
 async def update_recipe(id: str, data: dict,user_id: str):
