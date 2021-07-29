@@ -100,8 +100,7 @@ def ResponseModel(data, message,elapsed=None):
         "data": [data],
         "code": 200,
         "message": message,
-        "count":len(data),
-        "time":round(elapsed ,2)
+        "count":len(data)
     }
 
 

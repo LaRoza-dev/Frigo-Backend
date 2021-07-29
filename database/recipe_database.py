@@ -24,22 +24,19 @@ recipe_collection = database.get_collection("recipes_collection")
 async def retrieve_recipes(user_id,pageNumber:int,nPerPage:int,is_admin=None):
     recipes = []
     if is_admin:
-        started_time = time.time()
         async for recipe in recipe_collection.find({}).sort("name").skip( pageNumber > 0 if ( ( pageNumber - 1 ) * nPerPage ) else 0 ).limit( nPerPage ):
             recipes.append(recipe_helper(recipe))
-        finished_time=time.time() - started_time
-        print(finished_time)
     else:
         async for recipe in recipe_collection.find({"$or":[{ "user_id":user_id},{"user_id":"1"}]}).sort("name").skip( pageNumber > 0 if ( ( pageNumber - 1 ) * nPerPage ) else 0 ).limit( nPerPage ):
             recipes.append(recipe_helper(recipe))
     return recipes
 
 # Retrieve all recipes present in the database which has ingredient list 
-async def retrieve_recipes_by_ingredients(user_id,is_admin=None,query:list=None):
+async def retrieve_recipes_by_ingredients(user_id,pageNumber:int,nPerPage:int,is_admin=None,query:list=None):
     recipes = []
+    query=list(map(lambda recipe: re.compile(f"^.*{recipe}.*$",re.IGNORECASE),query))
     if is_admin:
-        query=list(map(lambda recipe: re.compile(f"^.*{recipe}.*$",re.IGNORECASE),query))
-        async for recipe in recipe_collection.find({"ingredients":{"$in":query}}):
+        async for recipe in recipe_collection.find({"ingredients":{"$in":query}}).sort("name").skip( pageNumber > 0 if ( ( pageNumber - 1 ) * nPerPage ) else 0 ).limit( nPerPage ):
             recipes.append(recipe_helper(recipe))
     else:
         async for recipe in recipe_collection.find({
@@ -51,7 +48,7 @@ async def retrieve_recipes_by_ingredients(user_id,is_admin=None,query:list=None)
                 }
                 ,{"ingredients":{"$in":query}}
                 ]
-            }):
+            }).sort("name").skip( pageNumber > 0 if ( ( pageNumber - 1 ) * nPerPage ) else 0 ).limit( nPerPage ):
             recipes.append(recipe_helper(recipe))
     return recipes
 
