@@ -95,11 +95,13 @@ class UpdateRecipeModel(BaseModel):
         }
 
 
-def ResponseModel(data, message):
+def ResponseModel(data, message,elapsed=None):
     return {
         "data": [data],
         "code": 200,
         "message": message,
+        "count":len(data),
+        "time":round(elapsed ,2)
     }
 
 

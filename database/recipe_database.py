@@ -2,7 +2,8 @@ import motor.motor_asyncio
 from bson.objectid import ObjectId
 from decouple import config
 from .database_helper import recipe_helper
-import re
+import re,time
+
 
 stage = config('stage')
 if stage == "development":
@@ -20,13 +21,16 @@ recipe_collection = database.get_collection("recipes_collection")
 
 
 # Retrieve all recipes present in the database
-async def retrieve_recipes(user_id,is_admin=None):
+async def retrieve_recipes(user_id,pageNumber:int,nPerPage:int,is_admin=None):
     recipes = []
     if is_admin:
-        async for recipe in recipe_collection.find({}):
+        started_time = time.time()
+        async for recipe in recipe_collection.find({}).sort("name").skip( pageNumber > 0 if ( ( pageNumber - 1 ) * nPerPage ) else 0 ).limit( nPerPage ):
             recipes.append(recipe_helper(recipe))
+        finished_time=time.time() - started_time
+        print(finished_time)
     else:
-        async for recipe in recipe_collection.find({"$or":[{ "user_id":user_id},{"user_id":"1"}]}):
+        async for recipe in recipe_collection.find({"$or":[{ "user_id":user_id},{"user_id":"1"}]}).sort("name").skip( pageNumber > 0 if ( ( pageNumber - 1 ) * nPerPage ) else 0 ).limit( nPerPage ):
             recipes.append(recipe_helper(recipe))
     return recipes
 
@@ -64,10 +68,12 @@ async def retrieve_recipe(id: str,user_id: str) -> dict:
     if recipe:
         return recipe_helper(recipe)
 
-async def retrieve_recipe_name(name: str,user_id: str) -> dict:
-    recipe = await recipe_collection.find_one({"$or":[{"name": {'$regex': f".*{name}.*","$options":"i"}, "user_id":user_id},{"name":{'$regex': f".*{name}.*","$options":"i"},"user_id":"1"}]})
-    if recipe:
-        return recipe_helper(recipe)
+async def retrieve_recipe_name(name: str,user_id: str,pageNumber:int, nPerPage:int) -> dict:
+    recipes=[]
+    async for recipe in recipe_collection.find({"$or":[{"name": {'$regex': f".*{name}.*","$options":"i"}, "user_id":user_id},{"name":{'$regex': f".*{name}.*","$options":"i"},"user_id":"1"}]}).sort("name").skip( pageNumber > 0 if ( ( pageNumber - 1 ) * nPerPage ) else 0 ).limit( nPerPage ):
+        recipes.append(recipe_helper(recipe))
+    return recipes
+ 
 
 # Update a recipe with a matching ID
 async def update_recipe(id: str, data: dict,user_id: str):

@@ -4,6 +4,8 @@ from fastapi import APIRouter, Body,Header
 from fastapi.encoders import jsonable_encoder
 from typing import Optional
 
+import time
+
 from database.recipe_database import (
     add_recipe,
     delete_recipe,
@@ -44,13 +46,15 @@ async def add_recipe_data(recipe: RecipeSchema = Body(...),authorization:Optiona
 
 
 @recipe_router.get("/", response_description="Recipes retrieved")
-async def get_recipes(authorization:Optional[str]=Header(None)):
+async def get_recipes(authorization:Optional[str]=Header(None),pageNumber:int=0, nPerPage:int=10):
+    started_time = time.time()
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
     user_id = (await retrieve_user(email=token_data['user_id']))['id']
-    recipes = await retrieve_recipes(user_id,is_admin)
+    recipes = await retrieve_recipes(user_id,pageNumber, nPerPage,is_admin)
+    finished_time=time.time() - started_time
     if recipes:
-        return ResponseModel(recipes, "Recipes data retrieved successfully")
+        return ResponseModel(recipes, "Recipes data retrieved successfully",finished_time)
     return ResponseModel(recipes, "Empty list returned")
 
 @recipe_router.post("/search", response_description="Recipes retrieved")
@@ -74,10 +78,10 @@ async def get_recipe_data(id,authorization:Optional[str]=Header(None)):
     return ErrorResponseModel("An error occurred.", 404, "Recipe doesn't exist.")
 
 @recipe_router.get("/{name}", response_description="Recipe data retrieved")
-async def get_recipe_name(name,authorization:Optional[str]=Header(None)):
+async def get_recipe_name(name,authorization:Optional[str]=Header(None),pageNumber:int=0, nPerPage:int=10):
     token_data = decodeJWT(authorization.split(' ')[1])
     user_id = (await retrieve_user(email=token_data['user_id']))['id']
-    recipe = await retrieve_recipe_name(name,user_id)
+    recipe = await retrieve_recipe_name(name,user_id,pageNumber, nPerPage)
     if recipe:
         return ResponseModel(recipe, "Recipe data retrieved successfully")
     return ErrorResponseModel("An error occurred.", 404, "Recipe doesn't exist.")
