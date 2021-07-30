@@ -18,17 +18,18 @@ hash_helper = CryptContext(schemes=["bcrypt"])
 #-------------------------------------------------------------------------------------------------
 config = Config('.env')
 oauth = OAuth(config)
-
 google_route = APIRouter()
-
 CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+
+# SIGN IN AND SIGN UP WITH GOOGLE
+#-------------------------------------------------------------------------------------------------
 oauth.register(
     name='google',
     server_metadata_url=CONF_URL,
     client_kwargs={
         'scope': 'openid email profile'
-    }
-)
+    })
+
 
 @google_route.get('/')
 async def homepage(request: Request):
@@ -50,7 +51,6 @@ async def login(request: Request):
     return await oauth.google.authorize_redirect(request, redirect_uri) 
 
 
-
 @google_route.get('/auth')
 async def auth(request: Request):
     try:
@@ -62,6 +62,7 @@ async def auth(request: Request):
     return RedirectResponse('/google')
     
 
+# USER SIGN IN AND SIGN UP
 #-------------------------------------------------------------------------------------------------
 @user_login_router.post("/register", response_description="User data added into the database")
 async def add_user_data(user: UserModel = Body(...)):
@@ -87,6 +88,8 @@ async def user_login(user_credentials: UserPassModel = Body(...)):
 
     return "Incorrect email or password"
 
+
+# USER CRUD OPERATIONS
 #-------------------------------------------------------------------------------------------------
 
 @user_router.get("/", response_description="Users retrieved")
@@ -114,26 +117,38 @@ async def get_user_data(id: str, authorization:Optional[str]=Header(None)):
     return "Permission denied"
 
 
-@user_router.delete("/{id}", response_description="User data deleted from the database")
-async def delete_user_data(id: str, authorization:Optional[str]=Header(None)):
-    token_data = decodeJWT(authorization.split(' ')[1])
-    is_admin = token_data['is_admin']
-    if is_admin:
-        deleted_user = await delete_user(id)
-        return ResponseModel("User with ID: {} removed".format(id), "User deleted successfully") \
-            if deleted_user \
-            else ErrorResponseModel("An error occured", 404, "User with id {0} doesn't exist".format(id))
-    return "Permission denied"
-
 @user_router.put("{id}")
 async def update_user(id: str, req: UpdateUserModel = Body(...), authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
     if is_admin:
-        updated_user = await update_user_data(id, req.dict())
+        updated_user = await update_user_data_admin(id, req.dict())
         return ResponseModel("User with ID: {} name update is successful".format(id),
                             "User name updated successfully") \
             if updated_user \
             else ErrorResponseModel("An error occurred", 404, "There was an error updating the user.".format(id))
-    return "Permission denied"
+    else:
+        user_id = (await retrieve_user(email=token_data['user_id']))['id']
+        updated_user = await update_user_data(id, req.dict(),user_id)
+        return ResponseModel("User with ID: {} name update is successful".format(id),
+                            "User name updated successfully") \
+            if updated_user \
+            else ErrorResponseModel("An error occurred", 404, "There was an error updating the user.".format(id))
 
+
+@user_router.delete("/{id}", response_description="User data deleted from the database")
+async def delete_user_data(id: str, authorization:Optional[str]=Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    is_admin = token_data['is_admin']
+    if is_admin:
+        deleted_user = await delete_user_admin(id)
+        return ResponseModel("User with ID: {} removed".format(id), "User deleted successfully") \
+            if deleted_user \
+            else ErrorResponseModel("An error occured", 404, "User with id {0} doesn't exist".format(id))
+    else:
+        user_id = (await retrieve_user(email=token_data['user_id']))['id']
+        deleted_user = await delete_user(id,user_id)
+        return ResponseModel("User with ID: {} removed".format(id), "User deleted successfully") \
+            if deleted_user \
+            else ErrorResponseModel("An error occured", 404, "User with id {0} doesn't exist".format(id))
+    

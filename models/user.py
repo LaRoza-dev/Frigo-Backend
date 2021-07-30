@@ -8,8 +8,8 @@ class UserModel(BaseModel):
     email: EmailStr = Field(...)
     password: str = Field(...)
     is_admin: bool=False
-    custom_ingredients: Optional[list]= Field(...)
-    fridge:Optional[list]= Field(...)
+    custom_ingredients: Optional[list]
+    fridge:Optional[list]
     
 
     class Config:
@@ -42,17 +42,13 @@ class UpdateUserModel(BaseModel):
     email: Optional[EmailStr]
     password: Optional[str]
     is_admin: Optional[bool]
-    custom_ingredients: Optional[list]
-    fridge:Optional[list]
 
     class Config:
         schema_extra = {
             "example": {
                 "fullname": "Mehdi Nurullah",
                 "email": "mehdi@laroza.dev",
-                "password": "password456",
-                "custom_ingredients":["cheese","olive"],
-                "fridge":["butter","bread"]
+                "password": "password456"
             }
         }
 

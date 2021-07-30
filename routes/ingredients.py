@@ -15,12 +15,13 @@ user_fridge = APIRouter()
 user_ingredients = APIRouter()
 
 
+# UPDATE USER'S FRIDGE
 @user_fridge.post("/{user_id}")
-async def add_user_fridge(user_id: str, req: UpdateUserModel = Body(...), authorization:Optional[str]=Header(None)):
+async def add_user_fridge(user_id: str, req:list=Body(...), authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
     # if is_admin:  
-    updated_user = await update_user_data(user_id, req.dict())
+    updated_user = await update_user_fridge(user_id, req)
     return ResponseModel("User with ID: {} name update is successful".format(user_id),
                         "User name updated successfully") \
         if updated_user \
@@ -28,5 +29,17 @@ async def add_user_fridge(user_id: str, req: UpdateUserModel = Body(...), author
     # return "Permission denied"
 
 
+# UPDATE USER'S CUSTOM INGREDIENTS
+@user_ingredients.post("/{user_id}")
+async def add_user_custom_ingredients(user_id: str, req:list=Body(...), authorization:Optional[str]=Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    is_admin = token_data['is_admin']
+    # if is_admin:  
+    updated_user = await update_user_custom_ingredient(user_id, req)
+    return ResponseModel("User with ID: {} name update is successful".format(user_id),
+                        "User name updated successfully") \
+        if updated_user \
+        else ErrorResponseModel("An error occurred", 404, "There was an error updating the user.".format(user_id))
+    # return "Permission denied"
 
 

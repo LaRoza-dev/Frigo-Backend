@@ -3,7 +3,6 @@ from bson.objectid import ObjectId
 from decouple import config
 from .database_helper import user_helper
 
-import pymongo
 
 
 stage = config('stage')
@@ -21,12 +20,26 @@ database = client.users
 user_collection = database.get_collection('users_collection')
 
 
+
+
+# ADD -----------------------------------------------
+# Add admin user
 async def add_admin(admin_data: dict) -> dict:
     admin_data['is_admin']=True
     admin = await user_collection.insert_one(admin_data)
     new_admin = await user_collection.find_one({"_id": admin.inserted_id})
     return user_helper(new_admin)
 
+
+# Add user
+async def add_user(user_data: dict) -> dict:
+    user = await user_collection.insert_one(user_data)
+    new_user = await user_collection.find_one({"_id": user.inserted_id})
+    return user_helper(new_user)
+
+
+# Get -----------------------------------------------
+# Get all users
 async def retrieve_users():
     users = []
     async for user in user_collection.find():
@@ -34,12 +47,7 @@ async def retrieve_users():
     return users
 
 
-async def add_user(user_data: dict) -> dict:
-    user = await user_collection.insert_one(user_data)
-    new_user = await user_collection.find_one({"_id": user.inserted_id})
-    return user_helper(new_user)
-
-
+# Retrieve user with matching is
 async def retrieve_user(id:str=None,email:str=None) -> dict:
     if email:
         user = await user_collection.find_one({"email": email})    
@@ -49,29 +57,53 @@ async def retrieve_user(id:str=None,email:str=None) -> dict:
         return user_helper(user)
 
 
-async def delete_user(id: str):
+# Update -----------------------------------------------
+# Update custom ingrediens of user with matching id
+async def update_user_custom_ingredient(id: str, data: list):
     user = await user_collection.find_one({"_id": ObjectId(id)})
+    if user:
+        data = {"custom_ingredients": data}
+        user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
+        return True
+
+
+# Update fridge items of user with matchind id
+async def update_user_fridge(id: str, data: list):
+    user = await user_collection.find_one({"_id": ObjectId(id)})
+    if user:
+        data = {"fridge": data}
+        user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
+        return True
+
+
+# Udate User data of user with matching id
+async def update_user_data(id: str, data: dict,user_id: str):
+    user = await user_collection.find_one({"_id": ObjectId(id),"user_id":user_id})
+    if user:
+        user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
+        return True
+
+
+# ADMIN Udates User data of user with matching id
+async def update_user_data_admin(id: str, data: dict):
+    user = await user_collection.find_one({"_id": ObjectId(id)})
+    if user:
+        user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
+        return True
+
+
+# DELETE -----------------------------------------------
+# Delete user
+async def delete_user(id: str,user_id: str):
+    user = await user_collection.find_one({"_id": ObjectId(id),"user_id":user_id})
     if user:
         await user_collection.delete_one({"_id": ObjectId(id)})
         return True
 
-
-async def update_user_data(id: str, data: dict):
-    # print(data)
-    # user = await user_collection.find_one({"_id": ObjectId(id)})
-    # print(user)
-    data=dict(filter(lambda x: x[1] is not None,data.items()))
-    # print(data)
-    # return True
-    # if user:
-    pymongo.write_concern.WriteConcern(w=0, wtimeout=None, j=None, fsync=None)
-    test = await user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
-    print(test.modified_count)
-    return test
-
-async def update_user_fridge(id: str, data: dict):
+# ADMIN Deletes user
+async def delete_user_admin(id: str):
     user = await user_collection.find_one({"_id": ObjectId(id)})
     if user:
-        user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
+        await user_collection.delete_one({"_id": ObjectId(id)})
         return True
         

@@ -31,6 +31,8 @@ from models.recipe import (
 recipe_router = APIRouter()
 
 
+# ADD -------------------------------------------------------------------------------
+# Add a recipe
 @recipe_router.post("/", response_description="Recipe data added into the database")
 async def add_recipe_data(recipe: RecipeSchema = Body(...),authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
@@ -45,6 +47,8 @@ async def add_recipe_data(recipe: RecipeSchema = Body(...),authorization:Optiona
     return ResponseModel(new_recipe, "Recipe added successfully.")
 
 
+# GET -------------------------------------------------------------------------------
+# Get all recipes
 @recipe_router.get("/", response_description="Recipes retrieved")
 async def get_recipes(authorization:Optional[str]=Header(None),pageNumber:int=0, nPerPage:int=10):
     token_data = decodeJWT(authorization.split(' ')[1])
@@ -55,6 +59,8 @@ async def get_recipes(authorization:Optional[str]=Header(None),pageNumber:int=0,
         return ResponseModel(recipes, "Recipes data retrieved successfully")
     return ResponseModel(recipes, "Empty list returned")
 
+
+# Get recipes with matching list
 @recipe_router.post("/search", response_description="Recipes retrieved")
 async def get_recipes_by_ingredients(query:list=Body(...),authorization:Optional[str]=Header(None),pageNumber:int=0, nPerPage:int=10):
     token_data = decodeJWT(authorization.split(' ')[1])
@@ -66,6 +72,7 @@ async def get_recipes_by_ingredients(query:list=Body(...),authorization:Optional
     return ResponseModel(recipes, "Empty list returned")
 
 
+# Get recipe with matchin id
 @recipe_router.get("/get_id/{id}", response_description="Recipe data retrieved")
 async def get_recipe_data(id,authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
@@ -75,6 +82,8 @@ async def get_recipe_data(id,authorization:Optional[str]=Header(None)):
         return ResponseModel(recipe, "Recipe data retrieved successfully")
     return ErrorResponseModel("An error occurred.", 404, "Recipe doesn't exist.")
 
+
+# Get recipes with matching name
 @recipe_router.get("/{name}", response_description="Recipe data retrieved")
 async def get_recipe_name(name,authorization:Optional[str]=Header(None),pageNumber:int=0, nPerPage:int=10):
     token_data = decodeJWT(authorization.split(' ')[1])
@@ -85,6 +94,8 @@ async def get_recipe_name(name,authorization:Optional[str]=Header(None),pageNumb
     return ErrorResponseModel("An error occurred.", 404, "Recipe doesn't exist.")
 
 
+# Update -------------------------------------------------------------------------------
+# Update recipe with maching id
 @recipe_router.put("/{id}")
 async def update_recipe_data(id: str, req: UpdateRecipeModel = Body(...),authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
@@ -111,6 +122,8 @@ async def update_recipe_data(id: str, req: UpdateRecipeModel = Body(...),authori
     )
 
 
+# DELETE -------------------------------------------------------------------------------
+# Delete recipe with matching id
 @recipe_router.delete("/{id}", response_description="Recipe data deleted from the database")
 async def delete_recipe_data(id: str,authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
@@ -118,7 +131,6 @@ async def delete_recipe_data(id: str,authorization:Optional[str]=Header(None)):
     if is_admin:
         deleted_recipe = await delete_recipe_admin(id)
     else:
-        # return print("token data",await retrieve_user(email=token_data['user_id']))
         user_id = (await retrieve_user(email=token_data['user_id']))['id']
         deleted_recipe = await delete_recipe(id,user_id)
     if deleted_recipe:
