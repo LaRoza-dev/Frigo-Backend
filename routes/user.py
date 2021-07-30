@@ -136,3 +136,4 @@ async def update_user(id: str, req: UpdateUserModel = Body(...), authorization:O
             if updated_user \
             else ErrorResponseModel("An error occurred", 404, "There was an error updating the user.".format(id))
     return "Permission denied"
+

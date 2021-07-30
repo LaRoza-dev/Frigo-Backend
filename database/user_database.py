@@ -3,6 +3,9 @@ from bson.objectid import ObjectId
 from decouple import config
 from .database_helper import user_helper
 
+import pymongo
+
+
 stage = config('stage')
 if stage == "development":
     MONGO_DETAILS = config('MONGO_DETAILS_DEV')
@@ -54,7 +57,21 @@ async def delete_user(id: str):
 
 
 async def update_user_data(id: str, data: dict):
+    # print(data)
+    # user = await user_collection.find_one({"_id": ObjectId(id)})
+    # print(user)
+    data=dict(filter(lambda x: x[1] is not None,data.items()))
+    # print(data)
+    # return True
+    # if user:
+    pymongo.write_concern.WriteConcern(w=0, wtimeout=None, j=None, fsync=None)
+    test = await user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
+    print(test.modified_count)
+    return test
+
+async def update_user_fridge(id: str, data: dict):
     user = await user_collection.find_one({"_id": ObjectId(id)})
     if user:
         user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
         return True
+        
