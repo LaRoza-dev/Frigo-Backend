@@ -56,11 +56,11 @@ async def get_recipes(authorization:Optional[str]=Header(None),pageNumber:int=0,
     return ResponseModel(recipes, "Empty list returned")
 
 @recipe_router.post("/search", response_description="Recipes retrieved")
-async def get_recipes_by_ingredients(query:list=Body(...),authorization:Optional[str]=Header(None)):
+async def get_recipes_by_ingredients(query:list=Body(...),authorization:Optional[str]=Header(None),pageNumber:int=0, nPerPage:int=10):
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
     user_id = (await retrieve_user(email=token_data['user_id']))['id']
-    recipes = await retrieve_recipes_by_ingredients(user_id,is_admin,query)
+    recipes = await retrieve_recipes_by_ingredients(user_id,pageNumber, nPerPage,is_admin,query)
     if recipes:
         return ResponseModel(recipes, "Recipes data retrieved successfully")
     return ResponseModel(recipes, "Empty list returned")
