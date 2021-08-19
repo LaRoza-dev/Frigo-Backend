@@ -31,35 +31,19 @@ oauth.register(
     })
 
 
-@google_route.get('/')
+@google_route.post('/')
 async def homepage(request: Request):
-    user = request.session.get('user')
+    user = await request.json() 
     if user:
         db_user = await user_collection.find_one({"email": user["email"]})
         if (db_user):
             return signJWT(user["email"])
-        sign_user = {"fullname":user["name"],"email":user["email"],"is_admin":False}
+        sign_user = {"fullname":user["displayName"],"email":user["email"],"is_admin":False}
         sign_user = jsonable_encoder(sign_user)
         new_user = await add_user(sign_user)
         return ResponseModel(new_user, "User added successfully.")
-    return RedirectResponse('/google/login')
-
-
-@google_route.get('/login')
-async def login(request: Request):
-    redirect_uri = request.url_for('auth')
-    return await oauth.google.authorize_redirect(request, redirect_uri) 
-
-
-@google_route.get('/auth')
-async def auth(request: Request):
-    try:
-        token = await oauth.google.authorize_access_token(request) 
-    except OAuthError as error:
-        return HTMLResponse(error.error)
-    user = await oauth.google.parse_id_token(request, token)
-    request.session['user'] = dict(user)
-    return RedirectResponse('/google')
+    return ErrorResponseModel("An error occured.", 404, "User doesn't exist.")
+    
     
 
 # USER SIGN IN AND SIGN UP
