@@ -68,9 +68,9 @@ async def user_login(user_credentials: UserPassModel = Body(...)):
         if (password):
             return signJWT(user_credentials.email)
 
-        return "Incorrect email or password"
+        return ErrorResponseModel("An error occured.", 404, "Incorrect email or password")
 
-    return "Incorrect email or password"
+    return ErrorResponseModel("An error occured.", 404, "Incorrect email or password")
 
 
 # USER CRUD OPERATIONS
