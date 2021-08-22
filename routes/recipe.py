@@ -40,7 +40,7 @@ async def add_recipe_data(recipe: RecipeSchema = Body(...),authorization:Optiona
     if is_admin:
         user_id = "1"
     else:
-        user_id = (await retrieve_user(email=token_data['user_id']))['id']
+        user_id = (await retrieve_user(email=token_data['email']))['id']
     recipe.user_id = user_id
     recipe = jsonable_encoder(recipe)
     new_recipe = await add_recipe(recipe)
@@ -53,7 +53,7 @@ async def add_recipe_data(recipe: RecipeSchema = Body(...),authorization:Optiona
 async def get_recipes(authorization:Optional[str]=Header(None),pageNumber:int=0, nPerPage:int=10):
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
-    user_id = (await retrieve_user(email=token_data['user_id']))['id']
+    user_id = (await retrieve_user(email=token_data['email']))['id']
     recipes = await retrieve_recipes(user_id,pageNumber, nPerPage,is_admin)
     if recipes:
         return ResponseModel(recipes, "Recipes data retrieved successfully")
@@ -65,7 +65,7 @@ async def get_recipes(authorization:Optional[str]=Header(None),pageNumber:int=0,
 async def get_recipes_by_ingredients(query:list=Body(...),authorization:Optional[str]=Header(None),pageNumber:int=0, nPerPage:int=10):
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
-    user_id = (await retrieve_user(email=token_data['user_id']))['id']
+    user_id = (await retrieve_user(email=token_data['email']))['id']
     recipes = await retrieve_recipes_by_ingredients(user_id,pageNumber, nPerPage,is_admin,query)
     if recipes:
         return ResponseModel(recipes, "Recipes data retrieved successfully")
@@ -76,7 +76,7 @@ async def get_recipes_by_ingredients(query:list=Body(...),authorization:Optional
 @recipe_router.get("/get_id/{id}", response_description="Recipe data retrieved")
 async def get_recipe_data(id,authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    user_id = (await retrieve_user(email=token_data['user_id']))['id']
+    user_id = (await retrieve_user(email=token_data['email']))['id']
     recipe = await retrieve_recipe(id,user_id)
     if recipe:
         return ResponseModel(recipe, "Recipe data retrieved successfully")
@@ -87,7 +87,7 @@ async def get_recipe_data(id,authorization:Optional[str]=Header(None)):
 @recipe_router.get("/{name}", response_description="Recipe data retrieved")
 async def get_recipe_name(name,authorization:Optional[str]=Header(None),pageNumber:int=0, nPerPage:int=10):
     token_data = decodeJWT(authorization.split(' ')[1])
-    user_id = (await retrieve_user(email=token_data['user_id']))['id']
+    user_id = (await retrieve_user(email=token_data['email']))['id']
     recipe = await retrieve_recipe_name(name,user_id,pageNumber, nPerPage)
     if recipe:
         return ResponseModel(recipe, "Recipe data retrieved successfully")
@@ -106,7 +106,7 @@ async def update_recipe_data(id: str, req: UpdateRecipeModel = Body(...),authori
         updated_recipe = await update_recipe_admin(id, req)
 
     else:
-        user_id = (await retrieve_user(email=token_data['user_id']))['id']
+        user_id = (await retrieve_user(email=token_data['email']))['id']
         req = {k: v for k, v in req.dict().items() if v is not None}
         updated_recipe = await update_recipe(id, req,user_id)
     
@@ -131,7 +131,7 @@ async def delete_recipe_data(id: str,authorization:Optional[str]=Header(None)):
     if is_admin:
         deleted_recipe = await delete_recipe_admin(id)
     else:
-        user_id = (await retrieve_user(email=token_data['user_id']))['id']
+        user_id = (await retrieve_user(email=token_data['email']))['id']
         deleted_recipe = await delete_recipe(id,user_id)
     if deleted_recipe:
         return ResponseModel(
