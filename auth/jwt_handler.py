@@ -14,7 +14,7 @@ def token_response(token: str):
     }
 
 JWT_SECRET = config('secret')
-client_ids = [config('CLIENT_ID'), config('CLIENT_ID2')]
+client_ids = [config('CLIENT_ANDROID'), config('CLIENT_IOS'),config('CLIENT_WEB')]
 
 def signJWT(email: str,is_admin:bool=False) -> Dict[str, str]:
     # Set the expiry time.
