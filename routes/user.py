@@ -15,21 +15,12 @@ user_router = APIRouter()
 user_login_router = APIRouter()
 
 hash_helper = CryptContext(schemes=["bcrypt"])
-#-------------------------------------------------------------------------------------------------
-config = Config('.env')
-oauth = OAuth(config)
-google_route = APIRouter()
-CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+
+
 
 # SIGN IN AND SIGN UP WITH GOOGLE
 #-------------------------------------------------------------------------------------------------
-oauth.register(
-    name='google',
-    server_metadata_url=CONF_URL,
-    client_kwargs={
-        'scope': 'openid email profile'
-    })
-
+google_route = APIRouter()
 
 @google_route.post('/')
 async def homepage(token:str=Body(...)):
