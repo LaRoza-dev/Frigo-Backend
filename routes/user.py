@@ -1,10 +1,7 @@
-from fastapi import APIRouter, Body,Header, Cookie
+from fastapi import APIRouter, Body,Header, status
 from fastapi.encoders import jsonable_encoder
 from passlib.context import CryptContext
-from starlette.config import Config
-from starlette.requests import Request
-from starlette.responses import HTMLResponse, RedirectResponse
-from authlib.integrations.starlette_client import OAuth, OAuthError
+from fastapi.responses import JSONResponse
 
 
 from database.user_database import *
@@ -22,7 +19,7 @@ hash_helper = CryptContext(schemes=["bcrypt"])
 #-------------------------------------------------------------------------------------------------
 google_route = APIRouter()
 
-@google_route.post('/')
+@google_route.post('/',responses={404: {"model": str}})
 async def homepage(token:str=Body(...)):
     user =  decodeJWT(token) 
     if user:
@@ -34,7 +31,7 @@ async def homepage(token:str=Body(...)):
         new_user = await add_user(sign_user)
         new_user.update(token_response(token))
         return token_response(token)
-    return ErrorResponseModel("An error occured.", 404, "Wrong format token")
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": "Wrong format token"})
     
     
 
@@ -51,19 +48,15 @@ async def add_user_data(user: UserModel = Body(...)):
     return ResponseModel(new_user, "User added successfully.")
 
 
-@user_login_router.post("/login")
+@user_login_router.post("/login",responses={404: {"model": str}})
 async def user_login(user_credentials: UserPassModel = Body(...)):
     user = await user_collection.find_one({"email": user_credentials.email})
-    print(user)
     if (user and "password" in user.keys()):
         password = hash_helper.verify(
             user_credentials.password, user["password"])
         if (password):
             return signJWT(user_credentials.email)
-
-        return ErrorResponseModel("An error occured.", 404, "Incorrect email or password")
-
-    return ErrorResponseModel("An error occured.", 404, "Incorrect email or password")
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": "Incorrect email or password"})  
 
 
 # USER CRUD OPERATIONS
