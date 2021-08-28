@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Depends
-from routes.recipes.recipe import recipe_router as recipeRouter
-from auth.jwt_bearer import JWTBearer
-from routes.admin.users import user_router as UserRouter
-from routes.login.login import user_login_router as UserLoginRouter
-from routes.admin.login import admin_router as AdminRouter
-from routes.login.google import google_route as GoogleRouter
-from routes.recipes.ingredients import user_fridge  as UserFridge, user_ingredients as CustomIngredient
+from .routes.recipes.recipe import recipe_router as recipeRouter
+from .auth.jwt_bearer import JWTBearer
+from .routes.admin.users import user_router as UserRouter
+from .routes.login.login import user_login_router as UserLoginRouter
+from .routes.admin.login import admin_router as AdminRouter
+from .routes.login.google import google_route as GoogleRouter
+from .routes.recipes.ingredients import user_fridge  as UserFridge, user_ingredients as CustomIngredient
 from starlette.middleware.sessions import SessionMiddleware
 from decouple import config
 
