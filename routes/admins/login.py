@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 
 from database.user_database import user_collection
 from auth.jwt_handler import signJWT, decodeJWT
-from database.user_database import add_admin, retrieve_user
+from database.user_database import add_admin
 from models.user import ErrorResponseModel, UserModel, UserPassModel
 
 from auth.jwt_bearer import JWTBearer

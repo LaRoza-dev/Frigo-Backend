@@ -25,7 +25,7 @@ async def add_user_fridge(user_id: str, req:list=Body(...), authorization:Option
     return ResponseModel("User with ID: {} name update is successful".format(user_id),
                         "User name updated successfully") \
         if updated_user \
-        else ErrorResponseModel("An error occurred", 404, "There was an error updating the user.".format(user_id))
+        else ErrorResponseModel(404, "There was an error updating the user.".format(user_id))
     # return "Permission denied"
 
 
@@ -39,7 +39,7 @@ async def add_user_custom_ingredients(user_id: str, req:list=Body(...), authoriz
     return ResponseModel("User with ID: {} name update is successful".format(user_id),
                         "User name updated successfully") \
         if updated_user \
-        else ErrorResponseModel("An error occurred", 404, "There was an error updating the user.".format(user_id))
+        else ErrorResponseModel(404, "There was an error updating the user.".format(user_id))
     # return "Permission denied"
 
 

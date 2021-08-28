@@ -1,14 +1,14 @@
+import uvicorn
 from fastapi import FastAPI, Depends
-from .routes.recipes.recipe import recipe_router as recipeRouter
-from .auth.jwt_bearer import JWTBearer
-from .routes.admin.users import user_router as UserRouter
-from .routes.login.login import user_login_router as UserLoginRouter
-from .routes.admin.login import admin_router as AdminRouter
-from .routes.login.google import google_route as GoogleRouter
-from .routes.recipes.ingredients import user_fridge  as UserFridge, user_ingredients as CustomIngredient
+from routes.recipes.recipe import recipe_router as recipeRouter
+from auth.jwt_bearer import JWTBearer
+from routes.users.login import user_login_router as UserLoginRouter
+from routes.users.google import google_route as GoogleRouter
+from routes.recipes.ingredients import user_fridge  as UserFridge, user_ingredients as CustomIngredient
+from routes.admins.login import admin_router as AdminRouter
+from routes.admins.users import user_router as UserRouter
 from starlette.middleware.sessions import SessionMiddleware
 from decouple import config
-
 
 
 stage = config('stage')
@@ -38,4 +38,5 @@ async def read_root():
     return {"message": "Welcome to this fantastic app!"}
 
 
-
+# if __name__ == "__main__":
+#     uvicorn.run("main:app", port=8000)
