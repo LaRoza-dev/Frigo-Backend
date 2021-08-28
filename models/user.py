@@ -1,6 +1,7 @@
 from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field
+from starlette.responses import JSONResponse
 
 
 class UserModel(BaseModel):
@@ -63,9 +64,10 @@ def ResponseModel(data, message):
     }
 
 
-def ErrorResponseModel(error, code, message):
-    return {
-        "error": error,
-        "code": code,
-        "message": message
-    }
+def ErrorResponseModel(code, message):
+    return JSONResponse(status_code=code, content={"message":message})
+    # return {
+    #     "error": error,
+    #     "code": code,
+    #     "message": message
+    # }
