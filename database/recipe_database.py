@@ -26,12 +26,15 @@ recipe_collection = database.get_collection("recipes_collection")
 async def retrieve_recipes(user_id, pageNumber: int, nPerPage: int, is_admin=None):
     recipes = []
     if is_admin:
+        total_number = await recipe_collection.count_documents({})
         async for recipe in recipe_collection.find({}).sort("name").skip(((pageNumber - 1) * nPerPage) if (pageNumber > 0) else 0).limit(nPerPage):
             recipes.append(recipe_helper(recipe))
     else:
+        # recipe_col = recipe_collection.find({"$or": [{"user_id": user_id}, {"user_id": "1"}]})
+        total_number = await recipe_collection.count_documents({"$or": [{"user_id": user_id}, {"user_id": "1"}]})
         async for recipe in recipe_collection.find({"$or": [{"user_id": user_id}, {"user_id": "1"}]}).sort("name").skip(((pageNumber - 1) * nPerPage) if (pageNumber > 0) else 0).limit(nPerPage):
             recipes.append(recipe_helper(recipe))
-    return recipes
+    return recipes, total_number
 
 
 # Add a new recipe into to the database
@@ -48,9 +51,19 @@ async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: in
     query = list(map(lambda recipe: re.compile(
         f"^.*{recipe}.*$", re.IGNORECASE), query))
     if is_admin:
+        total_number = await recipe_collection.count_documents({"ingredients": {"$in": query}})
         async for recipe in recipe_collection.find({"ingredients": {"$in": query}}).sort("name").skip(((pageNumber - 1) * nPerPage) if (pageNumber > 0) else 0).limit(nPerPage):
             recipes.append(recipe_helper(recipe))
     else:
+        total_number = await recipe_collection.count_documents({
+            "$and": [
+                {"$or": [
+                    {"user_id": user_id},
+                    {"user_id": "1"}
+                ]
+                }, {"ingredients": {"$in": query}}
+            ]
+        })
         async for recipe in recipe_collection.find({
             "$and": [
                 {"$or": [
@@ -61,7 +74,7 @@ async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: in
             ]
         }).sort("name").skip(((pageNumber - 1) * nPerPage) if (pageNumber > 0) else 0).limit(nPerPage):
             recipes.append(recipe_helper(recipe))
-    return recipes
+    return recipes, total_number
 
 
 # Retrieve a recipe with a matching ID
@@ -74,9 +87,10 @@ async def retrieve_recipe(id: str, user_id: str) -> dict:
 # Retrieve a recipe with a matching name
 async def retrieve_recipe_name(name: str, user_id: str, pageNumber: int, nPerPage: int) -> dict:
     recipes = []
+    total_number = await recipe_collection.count_documents({"$or": [{"name": {'$regex': f".*{name}.*", "$options": "i"}, "user_id": user_id}, {"name": {'$regex': f".*{name}.*", "$options": "i"}, "user_id": "1"}]})
     async for recipe in recipe_collection.find({"$or": [{"name": {'$regex': f".*{name}.*", "$options": "i"}, "user_id": user_id}, {"name": {'$regex': f".*{name}.*", "$options": "i"}, "user_id": "1"}]}).sort("name").skip(((pageNumber - 1) * nPerPage) if (pageNumber > 0) else 0).limit(nPerPage):
         recipes.append(recipe_helper(recipe))
-    return recipes
+    return recipes, total_number
 
 
 # Update -------------------------------------------------------------------------------

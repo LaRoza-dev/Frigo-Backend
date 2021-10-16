@@ -24,7 +24,7 @@ class RecipeSchema(BaseModel):
                 "serves": "Serves 2",
                 "prep_time": "10 mins",
                 "url": "https://www.bbcgoodfood.com/recipes/beetroot-tabbouleh",
-                "ingredients":[
+                "ingredients": [
                     "250g pouch cooked grains",
                     "2 small beetroots, peeled and quartered",
                     "small bunch of mint, leaves picked, plus extra to serve",
@@ -58,7 +58,7 @@ class UpdateRecipeModel(BaseModel):
     url: Optional[HttpUrl]
     ingredients: Optional[List[str]]
     cook_steps: Optional[List[str]]
-    nutritions: Optional[Dict[str,str]]
+    nutritions: Optional[Dict[str, str]]
 
     class Config:
         schema_extra = {
@@ -69,7 +69,7 @@ class UpdateRecipeModel(BaseModel):
                 "serves": "Serves 12",
                 "prep_time": "1hr and 10 mins",
                 "url": "https://www.bbcgoodfood.com/recipes/beetroot-tabbouleh",
-                "ingredients":[
+                "ingredients": [
                     "2 Kg pouch cooked grains",
                     "2 big beetroots, peeled and quartered",
                     "big bunch of mint, leaves picked, plus extra to serve",
@@ -90,17 +90,18 @@ class UpdateRecipeModel(BaseModel):
                     "saturates": "9g",
                     "carbs": "150g"
                 },
-                
+
             }
         }
 
 
-def ResponseModel(data, message,elapsed=None):
+def ResponseModel(data, message, total_number, elapsed=None):
     return {
         "data": data,
         "code": 200,
         "message": message,
-        "count":len(data)
+        "count": len(data),
+        "total_number": total_number,
     }
 
 

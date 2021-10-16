@@ -54,9 +54,9 @@ async def get_recipes(authorization: Optional[str] = Header(None), pageNumber: i
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
     user_id = (await retrieve_user(email=token_data['email']))['id']
-    recipes = await retrieve_recipes(user_id, pageNumber, nPerPage, is_admin)
+    recipes,total_number = await retrieve_recipes(user_id, pageNumber, nPerPage, is_admin)
     if recipes:
-        return ResponseModel(recipes, "Recipes data retrieved successfully")
+        return ResponseModel(recipes, "Recipes data retrieved successfully",total_number)
     return ResponseModel(recipes, "Empty list returned")
 
 
@@ -66,9 +66,9 @@ async def get_recipes_by_ingredients(query: list = Body(...), authorization: Opt
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
     user_id = (await retrieve_user(email=token_data['email']))['id']
-    recipes = await retrieve_recipes_by_ingredients(user_id, pageNumber, nPerPage, is_admin, query)
+    recipes,total_number = await retrieve_recipes_by_ingredients(user_id, pageNumber, nPerPage, is_admin, query)
     if recipes:
-        return ResponseModel(recipes, "Recipes data retrieved successfully")
+        return ResponseModel(recipes, "Recipes data retrieved successfully",total_number)
     return ResponseModel(recipes, "Empty list returned")
 
 
@@ -88,9 +88,9 @@ async def get_recipe_data(id, authorization: Optional[str] = Header(None)):
 async def get_recipe_name(name, authorization: Optional[str] = Header(None), pageNumber: int = 0, nPerPage: int = 10):
     token_data = decodeJWT(authorization.split(' ')[1])
     user_id = (await retrieve_user(email=token_data['email']))['id']
-    recipe = await retrieve_recipe_name(name, user_id, pageNumber, nPerPage)
-    if recipe:
-        return ResponseModel(recipe, "Recipe data retrieved successfully")
+    recipes,total_number = await retrieve_recipe_name(name, user_id, pageNumber, nPerPage)
+    if recipes:
+        return ResponseModel(recipes, "Recipe data retrieved successfully",total_number)
     return ErrorResponseModel(404, "Recipe doesn't exist.")
 
 
