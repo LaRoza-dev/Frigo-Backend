@@ -10,6 +10,8 @@ from routes.admins.users import user_router as UserRouter
 from starlette.middleware.sessions import SessionMiddleware
 from decouple import config
 
+from fastapi.middleware.cors import CORSMiddleware
+
 
 stage = config('stage')
 if stage == "development":
@@ -20,6 +22,22 @@ elif stage == "production":
     print("WARNING:  You are in the PRODUCTION environment !")
 else:
     print("ERROR:   Stage in not define.")
+
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.add_middleware(SessionMiddleware, secret_key=config("secret"))
 
