@@ -57,7 +57,7 @@ async def get_recipes(authorization: Optional[str] = Header(None), pageNumber: i
     recipes,total_number = await retrieve_recipes(user_id, pageNumber, nPerPage, is_admin)
     if recipes:
         return ResponseModel(recipes, "Recipes data retrieved successfully",total_number)
-    return ResponseModel(recipes, "Empty list returned")
+    return ResponseModel(recipes, "Empty list returned",total_number)
 
 
 # Get recipes with matching list
@@ -69,7 +69,7 @@ async def get_recipes_by_ingredients(query: list = Body(...), authorization: Opt
     recipes,total_number = await retrieve_recipes_by_ingredients(user_id, pageNumber, nPerPage, is_admin, query)
     if recipes:
         return ResponseModel(recipes, "Recipes data retrieved successfully",total_number)
-    return ResponseModel(recipes, "Empty list returned")
+    return ResponseModel(recipes, "Empty list returned",total_number)
 
 
 # Get recipe with matchin id
@@ -91,7 +91,7 @@ async def get_recipe_name(name, authorization: Optional[str] = Header(None), pag
     recipes,total_number = await retrieve_recipe_name(name, user_id, pageNumber, nPerPage)
     if recipes:
         return ResponseModel(recipes, "Recipe data retrieved successfully",total_number)
-    return ErrorResponseModel(404, "Recipe doesn't exist.")
+    return ErrorResponseModel(404, "Recipe doesn't exist.",total_number)
 
 
 # Update -------------------------------------------------------------------------------
