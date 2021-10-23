@@ -32,7 +32,7 @@ async def retrieve_recipes(user_id, pageNumber: int, nPerPage: int, is_admin=Non
     else:
         # recipe_col = recipe_collection.find({"$or": [{"user_id": user_id}, {"user_id": "1"}]})
         total_number = await recipe_collection.count_documents({"$or": [{"user_id": user_id}, {"user_id": "1"}]})
-        async for recipe in recipe_collection.find({"$or": [{"user_id": user_id}, {"user_id": "1"}]}).sort("name").skip(((pageNumber - 1) * nPerPage) if (pageNumber > 0) else 0).limit(nPerPage):
+        async for recipe in recipe_collection.find({"$or": [{"user_id": user_id}, {"user_id": "1"}]}).sort("name").skip((pageNumber * nPerPage) if (pageNumber > 0) else 0).limit(nPerPage):
             recipes.append(recipe_helper(recipe))
     return recipes, total_number
 
