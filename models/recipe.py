@@ -5,6 +5,7 @@ from pydantic import BaseModel, HttpUrl, Field
 
 class RecipeSchema(BaseModel):
     name: str = Field(...)
+    introduction: str = Field(...)
     stars: int = Field(...)
     skill: str = Field(...)
     serves: str = Field(...)
@@ -19,6 +20,7 @@ class RecipeSchema(BaseModel):
         schema_extra = {
             "example": {
                 "name": "Beetroot tabbouleh",
+                "introduction": "introduction1",
                 "stars": "1",
                 "skill": "Easy",
                 "serves": "Serves 2",
@@ -51,6 +53,7 @@ class RecipeSchema(BaseModel):
 
 class UpdateRecipeModel(BaseModel):
     name: Optional[str]
+    introduction: Optional[str]
     stars: Optional[int]
     skill: Optional[str]
     serves: Optional[str]
@@ -64,6 +67,7 @@ class UpdateRecipeModel(BaseModel):
         schema_extra = {
             "example": {
                 "name": "Beetroot tabbouleh",
+                "introduction": "introduction1",
                 "stars": "5",
                 "skill": "Hard",
                 "serves": "Serves 12",

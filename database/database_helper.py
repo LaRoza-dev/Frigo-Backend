@@ -5,6 +5,7 @@ def recipe_helper(recipe) -> dict:
     return {
         "id": str(recipe["_id"]),
         "name": recipe["name"],
+        "introduction": recipe["introduction"],
         "stars": recipe["stars"],
         "skill": recipe["skill"],
         "serves": recipe["serves"],
