@@ -79,8 +79,8 @@ async def get_recipe_data(id, authorization: Optional[str] = Header(None)):
     user_id = (await retrieve_user(email=token_data['email']))['id']
     recipe = await retrieve_recipe(id, user_id)
     if recipe:
-        return ResponseModel(recipe, "Recipe data retrieved successfully")
-    return ErrorResponseModel(404, "Recipe doesn't exist.")
+        return ResponseModel(recipe, "Recipe data retrieved successfully",1)
+    return ErrorResponseModel(404, "Recipe doesn't exist.",1)
 
 
 # Get recipes with matching name
