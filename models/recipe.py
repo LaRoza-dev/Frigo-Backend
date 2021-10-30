@@ -15,6 +15,7 @@ class RecipeSchema(BaseModel):
     cook_steps: List[str] = Field(...)
     nutritions: Dict[str, str] = Field(...)
     user_id: Optional[str]
+    finded_ing_count: Optional[int]
 
     class Config:
         schema_extra = {

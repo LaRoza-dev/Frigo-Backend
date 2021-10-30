@@ -3,6 +3,7 @@ from bson.objectid import ObjectId
 from decouple import config
 from .database_helper import recipe_helper
 import re
+from operator import itemgetter
 
 
 stage = config('stage')
@@ -48,12 +49,27 @@ async def add_recipe(recipe_data: dict) -> dict:
 # Retrieve all recipes present in the database which has ingredient list
 async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: int, is_admin=None, query: list = None):
     recipes = []
-    query = list(map(lambda recipe: re.compile(
+    queryRE = list(map(lambda recipe: re.compile(
         f"^.*{recipe}.*$", re.IGNORECASE), query))
     if is_admin:
-        total_number = await recipe_collection.count_documents({"ingredients": {"$in": query}})
-        async for recipe in recipe_collection.find({"ingredients": {"$in": query}}).sort("name").skip(((pageNumber - 1) * nPerPage) if (pageNumber > 0) else 0).limit(nPerPage):
+        total_number = await recipe_collection.count_documents({"ingredients": {"$in": queryRE}})
+        async for recipe in recipe_collection.find({"ingredients": {"$in": queryRE}}):
             recipes.append(recipe_helper(recipe))
+        
+        #For sorting by ingredient count
+        for recipe in recipes:
+            ings =[]
+            for q in query:
+                for ing in recipe["ingredients"]:
+                    if re.findall(f"^.*{q}.*$", ing):
+                        ings.append(q)
+            #Remove dublicates
+            ings = list(dict.fromkeys(ings))
+            recipe["finded_ing_count"] = len(ings)
+        recipes.sort(key=itemgetter('finded_ing_count'),reverse=True)
+        
+        recipes = recipes[pageNumber*nPerPage:pageNumber*nPerPage+nPerPage]
+
     else:
         total_number = await recipe_collection.count_documents({
             "$and": [
@@ -61,7 +77,7 @@ async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: in
                     {"user_id": user_id},
                     {"user_id": "1"}
                 ]
-                }, {"ingredients": {"$in": query}}
+                }, {"ingredients": {"$in": queryRE}}
             ]
         })
         async for recipe in recipe_collection.find({
@@ -70,10 +86,24 @@ async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: in
                     {"user_id": user_id},
                     {"user_id": "1"}
                 ]
-                }, {"ingredients": {"$in": query}}
+                }, {"ingredients": {"$in": queryRE}}
             ]
-        }).sort("name").skip(((pageNumber - 1) * nPerPage) if (pageNumber > 0) else 0).limit(nPerPage):
+        }):
             recipes.append(recipe_helper(recipe))
+
+        #For sorting by ingredient count
+        for recipe in recipes:
+            ings =[]
+            for q in query:
+                for ing in recipe["ingredients"]:
+                    if re.findall(f"^.*{q}.*$", ing):
+                        ings.append(q)
+            #Remove dublicates
+            ings = list(dict.fromkeys(ings))
+            recipe["finded_ing_count"] = len(ings)
+        recipes.sort(key=itemgetter('finded_ing_count'),reverse=True)
+        
+        recipes = recipes[pageNumber*nPerPage:pageNumber*nPerPage+nPerPage]
     return recipes, total_number
 
 
