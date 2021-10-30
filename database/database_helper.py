@@ -10,6 +10,7 @@ def recipe_helper(recipe) -> dict:
         "skill": recipe["skill"],
         "serves": recipe["serves"],
         "prep_time": recipe["prep_time"],
+        "cook_time": recipe["cook_time"],
         "url": recipe["url"],
         "ingredients": recipe["ingredients"],
         "cook_steps": recipe["cook_steps"],

@@ -10,6 +10,7 @@ class RecipeSchema(BaseModel):
     skill: str = Field(...)
     serves: str = Field(...)
     prep_time: str = Field(...)
+    cook_time: str = Field(...)
     url: HttpUrl = Field(...)
     ingredients: List[str] = Field(...)
     cook_steps: List[str] = Field(...)
@@ -26,6 +27,7 @@ class RecipeSchema(BaseModel):
                 "skill": "Easy",
                 "serves": "Serves 2",
                 "prep_time": "10 mins",
+                "cook_time": "10 mins",
                 "url": "https://www.bbcgoodfood.com/recipes/beetroot-tabbouleh",
                 "ingredients": [
                     "250g pouch cooked grains",
@@ -59,6 +61,7 @@ class UpdateRecipeModel(BaseModel):
     skill: Optional[str]
     serves: Optional[str]
     prep_time: Optional[str]
+    cook_time: Optional[str]
     url: Optional[HttpUrl]
     ingredients: Optional[List[str]]
     cook_steps: Optional[List[str]]
@@ -73,6 +76,7 @@ class UpdateRecipeModel(BaseModel):
                 "skill": "Hard",
                 "serves": "Serves 12",
                 "prep_time": "1hr and 10 mins",
+                "cook_time": "10 mins",
                 "url": "https://www.bbcgoodfood.com/recipes/beetroot-tabbouleh",
                 "ingredients": [
                     "2 Kg pouch cooked grains",
