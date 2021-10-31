@@ -38,7 +38,7 @@ async def get_user_data(id: str, authorization: Optional[str] = Header(None)):
     return ErrorResponseModel(403, "Permission denied")
 
 
-@user_router.put("{id}")
+@user_router.put("/{id}")
 async def update_user(id: str, req: UpdateUserModel = Body(...), authorization: Optional[str] = Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
@@ -49,12 +49,16 @@ async def update_user(id: str, req: UpdateUserModel = Body(...), authorization: 
             if updated_user \
             else ErrorResponseModel(400, "There was an error updating the user.".format(id))
     else:
-        user_id = (await retrieve_user(email=token_data['email']))['id']
-        updated_user = await update_user_data(id, req.dict(), user_id)
-        return ResponseModel("User with ID: {} name update is successful".format(id),
-                             "User name updated successfully") \
-            if updated_user \
-            else ErrorResponseModel(400, "There was an error updating the user.".format(id))
+        try:
+            user_id = (await retrieve_user(email=token_data['email']))['id']
+        except:
+            user_id = None
+        if user_id:
+            updated_user = await update_user_data(user_id, req.dict())
+            if updated_user:
+                return ResponseModel("User with ID: {} name update is successful".format(id),
+                                     "User name updated successfully")
+        return ErrorResponseModel(400, "There was an error updating the user.".format(id))
 
 
 @user_router.delete("/{id}", response_description="User data deleted from the database")

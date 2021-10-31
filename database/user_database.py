@@ -4,7 +4,6 @@ from decouple import config
 from .database_helper import user_helper
 
 
-
 stage = config('stage')
 if stage == "development":
     MONGO_DETAILS = config('MONGO_DETAILS_DEV')
@@ -13,19 +12,18 @@ elif stage == "production":
 else:
     print("WRONG MONGO ENV")
 
-client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS, tls=True, tlsAllowInvalidCertificates=True)
+client = motor.motor_asyncio.AsyncIOMotorClient(
+    MONGO_DETAILS, tls=True, tlsAllowInvalidCertificates=True)
 
 database = client.users
 
 user_collection = database.get_collection('users_collection')
 
 
-
-
 # ADD -----------------------------------------------
 # Add admin user
 async def add_admin(admin_data: dict) -> dict:
-    admin_data['is_admin']=True
+    admin_data['is_admin'] = True
     admin = await user_collection.insert_one(admin_data)
     new_admin = await user_collection.find_one({"_id": admin.inserted_id})
     return user_helper(new_admin)
@@ -48,9 +46,9 @@ async def retrieve_users():
 
 
 # Retrieve user with matching is
-async def retrieve_user(id:str=None,email:str=None) -> dict:
+async def retrieve_user(id: str = None, email: str = None) -> dict:
     if email:
-        user = await user_collection.find_one({"email": email})    
+        user = await user_collection.find_one({"email": email})
     else:
         user = await user_collection.find_one({"_id": ObjectId(id)})
     if user:
@@ -61,6 +59,9 @@ async def retrieve_user(id:str=None,email:str=None) -> dict:
 # Update custom ingrediens of user with matching id
 async def update_user_custom_ingredient(id: str, data: list):
     user = await user_collection.find_one({"_id": ObjectId(id)})
+    for k, v in list(data.items()):
+        if v is None:
+            del data[k]
     if user:
         data = {"custom_ingredients": data}
         user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
@@ -72,13 +73,19 @@ async def update_user_fridge(id: str, data: list):
     user = await user_collection.find_one({"_id": ObjectId(id)})
     if user:
         data = {"fridge": data}
+        for k, v in list(data.items()):
+            if v is None:
+                del data[k]
         user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
         return True
 
 
 # Udate User data of user with matching id
-async def update_user_data(id: str, data: dict,user_id: str):
-    user = await user_collection.find_one({"_id": ObjectId(id),"user_id":user_id})
+async def update_user_data(id: str, data: dict):
+    user = await user_collection.find_one({"_id": ObjectId(id)})
+    for k, v in list(data.items()):
+        if v is None:
+            del data[k]
     if user:
         user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
         return True
@@ -87,6 +94,9 @@ async def update_user_data(id: str, data: dict,user_id: str):
 # ADMIN Udates User data of user with matching id
 async def update_user_data_admin(id: str, data: dict):
     user = await user_collection.find_one({"_id": ObjectId(id)})
+    for k, v in list(data.items()):
+        if v is None:
+            del data[k]
     if user:
         user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
         return True
@@ -94,16 +104,17 @@ async def update_user_data_admin(id: str, data: dict):
 
 # DELETE -----------------------------------------------
 # Delete user
-async def delete_user(id: str,user_id: str):
-    user = await user_collection.find_one({"_id": ObjectId(id),"user_id":user_id})
+async def delete_user(id: str, user_id: str):
+    user = await user_collection.find_one({"_id": ObjectId(id), "user_id": user_id})
     if user:
         await user_collection.delete_one({"_id": ObjectId(id)})
         return True
 
 # ADMIN Deletes user
+
+
 async def delete_user_admin(id: str):
     user = await user_collection.find_one({"_id": ObjectId(id)})
     if user:
         await user_collection.delete_one({"_id": ObjectId(id)})
         return True
-        
