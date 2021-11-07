@@ -24,17 +24,25 @@ recipe_collection = database.get_collection("recipes_collection")
 
 # ADD -------------------------------------------------------------------------------
 # Retrieve all recipes present in the database
-async def retrieve_recipes(user_id, pageNumber: int, nPerPage: int, is_admin=None):
+async def retrieve_recipes(user_id, pageNumber: int, nPerPage: int, is_admin=None,name=''):
     recipes = []
     if is_admin:
-        total_number = await recipe_collection.count_documents({})
-        async for recipe in recipe_collection.find({}).sort("name").skip(((pageNumber - 1) * nPerPage) if (pageNumber > 0) else 0).limit(nPerPage):
+        # total_number = await recipe_collection.count_documents({})
+        async for recipe in recipe_collection.find({}).sort("name"):
             recipes.append(recipe_helper(recipe))
+
+        recipes = list(filter(lambda x: name in x["name"] , recipes))
+        total_number = len(recipes)
+        recipes = recipes[pageNumber*nPerPage:pageNumber*nPerPage+nPerPage]
     else:
         # recipe_col = recipe_collection.find({"$or": [{"user_id": user_id}, {"user_id": "1"}]})
-        total_number = await recipe_collection.count_documents({"$or": [{"user_id": user_id}, {"user_id": "1"}]})
-        async for recipe in recipe_collection.find({"$or": [{"user_id": user_id}, {"user_id": "1"}]}).sort("name").skip((pageNumber * nPerPage) if (pageNumber > 0) else 0).limit(nPerPage):
+        # total_number = await recipe_collection.count_documents({"$or": [{"user_id": user_id}, {"user_id": "1"}]})
+        async for recipe in recipe_collection.find({"$or": [{"user_id": user_id}, {"user_id": "1"}]}).sort("name"):
             recipes.append(recipe_helper(recipe))
+
+        recipes = list(filter(lambda x: name in x["name"] , recipes))
+        total_number = len(recipes)
+        recipes = recipes[pageNumber*nPerPage:pageNumber*nPerPage+nPerPage]
     return recipes, total_number
 
 
@@ -47,7 +55,7 @@ async def add_recipe(recipe_data: dict) -> dict:
 
 # Get -------------------------------------------------------------------------------
 # Retrieve all recipes present in the database which has ingredient list
-async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: int, is_admin=None, query: list = None):
+async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: int, is_admin=None, query: list = None,name=''):
     recipes = []
     queryRE = list(map(lambda recipe: re.compile(
         f"^.*{recipe}.*$", re.IGNORECASE), query))
@@ -68,18 +76,11 @@ async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: in
             recipe["finded_ing_count"] = len(ings)
         recipes.sort(key=itemgetter('finded_ing_count'),reverse=True)
         
+        recipes = list(filter(lambda x: name in x["name"] , recipes))
+        total_number = len(recipes)
         recipes = recipes[pageNumber*nPerPage:pageNumber*nPerPage+nPerPage]
 
     else:
-        total_number = await recipe_collection.count_documents({
-            "$and": [
-                {"$or": [
-                    {"user_id": user_id},
-                    {"user_id": "1"}
-                ]
-                }, {"ingredients": {"$in": queryRE}}
-            ]
-        })
         async for recipe in recipe_collection.find({
             "$and": [
                 {"$or": [
@@ -102,7 +103,9 @@ async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: in
             ings = list(dict.fromkeys(ings))
             recipe["finded_ing_count"] = len(ings)
         recipes.sort(key=itemgetter('finded_ing_count'),reverse=True)
-        
+
+        recipes = list(filter(lambda x: name in x["name"] , recipes))
+        total_number = len(recipes)
         recipes = recipes[pageNumber*nPerPage:pageNumber*nPerPage+nPerPage]
     return recipes, total_number
 
