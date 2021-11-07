@@ -48,8 +48,8 @@ async def get_user_data(id: str, authorization: Optional[str] = Header(None)):
 
 
 
-@user_router.put("/{id}")
-async def update_user(id: str, req: UpdateUserModel = Body(...), authorization: Optional[str] = Header(None)):
+@user_router.put("/")
+async def update_user(id: Optional[str]=None, req: UpdateUserModel = Body(...), authorization: Optional[str] = Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
     if is_admin:
