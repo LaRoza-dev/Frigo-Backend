@@ -9,8 +9,8 @@ class UserModel(BaseModel):
     email: EmailStr = Field(...)
     password: str = Field(...)
     is_admin: bool=False
-    custom_ingredients: Optional[list]
-    fridge:Optional[list]
+    wishlist: Optional[list] = []
+    fridge:Optional[list]=[]
     
 
     class Config:

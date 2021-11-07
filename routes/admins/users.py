@@ -24,7 +24,16 @@ async def get_users(authorization: Optional[str] = Header(None)):
             else ResponseModel(
             users, "Empty list returned")
     return ErrorResponseModel(403, "Permission denied")
-
+    
+@user_router.get("/me", response_description="User data retrieved")
+async def get_user_data(authorization: Optional[str] = Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    email = token_data['email']
+    user = await retrieve_user(email=email)
+    return ResponseModel(user, "User data retrieved successfully") \
+        if user \
+        else ErrorResponseModel(404, "User doesn't exist.")
+    
 
 @user_router.get("/{id}", response_description="User data retrieved")
 async def get_user_data(id: str, authorization: Optional[str] = Header(None)):
@@ -36,6 +45,7 @@ async def get_user_data(id: str, authorization: Optional[str] = Header(None)):
             if user \
             else ErrorResponseModel(404, "User doesn't exist.")
     return ErrorResponseModel(403, "Permission denied")
+
 
 
 @user_router.put("/{id}")

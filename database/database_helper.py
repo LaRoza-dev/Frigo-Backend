@@ -24,6 +24,7 @@ def user_helper(user) -> dict:
         "id": str(user['_id']),
         "fullname": user['fullname'],
         "email": user['email'],
-        "is_admin":user['is_admin']
+        "is_admin":user['is_admin'],
+        "fridge":user['fridge']
     }
 

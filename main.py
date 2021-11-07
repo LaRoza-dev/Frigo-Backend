@@ -51,9 +51,9 @@ app.include_router(UserRouter, tags=[
                    "Users"], prefix="/users", dependencies=[Depends(token_listener)])
 app.include_router(GoogleRouter, tags=["google"], prefix="/google")
 app.include_router(UserFridge, tags=[
-                   "fridge"], prefix="/users/fridge", dependencies=[Depends(token_listener)])
+                   "Fridge"], prefix="/users/fridge", dependencies=[Depends(token_listener)])
 app.include_router(CustomIngredient, tags=[
-                   "custom ingredients"], prefix="/users/ingredients", dependencies=[Depends(token_listener)])
+                   "Wishlist"], prefix="/users/ingredients", dependencies=[Depends(token_listener)])
 
 
 @app.get("/", tags=["Root"])

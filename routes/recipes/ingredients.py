@@ -16,11 +16,12 @@ user_ingredients = APIRouter()
 
 
 # UPDATE USER'S FRIDGE
-@user_fridge.post("/{user_id}")
-async def add_user_fridge(user_id: str, req:list=Body(...), authorization:Optional[str]=Header(None)):
+@user_fridge.post("/")
+async def update_user_fridge_request(req:list=Body(...), authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
-    is_admin = token_data['is_admin']
-    # if is_admin:  
+    email = token_data['email']
+    user = await retrieve_user(email=email) 
+    user_id = user['id']
     updated_user = await update_user_fridge(user_id, req)
     return ResponseModel("User with ID: {} name update is successful".format(user_id),
                         "User name updated successfully") \
@@ -29,17 +30,45 @@ async def add_user_fridge(user_id: str, req:list=Body(...), authorization:Option
     # return "Permission denied"
 
 
-# UPDATE USER'S CUSTOM INGREDIENTS
-@user_ingredients.post("/{user_id}")
-async def add_user_custom_ingredients(user_id: str, req:list=Body(...), authorization:Optional[str]=Header(None)):
+# UPDATE USER'S FRIDGE
+@user_fridge.post("/{user_id}")
+async def update_user_fridge_request(user_id: str, req:list=Body(...), authorization:Optional[str]=Header(None)):
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
-    # if is_admin:  
-    updated_user = await update_user_custom_ingredient(user_id, req)
+    if is_admin:  
+        updated_user = await update_user_fridge(user_id, req)
+        return ResponseModel("User with ID: {} name update is successful".format(user_id),
+                            "User name updated successfully") \
+            if updated_user \
+            else ErrorResponseModel(404, "There was an error updating the user.".format(user_id))
+    return "Permission denied"
+
+
+# UPDATE USER'S WISHLIST
+@user_ingredients.post("/")
+async def update_user_wishlist_request( req:list=Body(...), authorization:Optional[str]=Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    email = token_data['email']
+    user = await retrieve_user(email=email) 
+    user_id = user['id']
+    updated_user = await update_user_wishlist(user_id, req)
     return ResponseModel("User with ID: {} name update is successful".format(user_id),
                         "User name updated successfully") \
         if updated_user \
         else ErrorResponseModel(404, "There was an error updating the user.".format(user_id))
-    # return "Permission denied"
+
+
+# UPDATE USER'S WISHLIST
+@user_ingredients.post("/{user_id}")
+async def update_user_wishlist_request(user_id: str, req:list=Body(...), authorization:Optional[str]=Header(None)):
+    token_data = decodeJWT(authorization.split(' ')[1])
+    is_admin = token_data['is_admin']
+    if is_admin:  
+        updated_user = await update_user_wishlist(user_id, req)
+        return ResponseModel("User with ID: {} name update is successful".format(user_id),
+                            "User name updated successfully") \
+            if updated_user \
+            else ErrorResponseModel(404, "There was an error updating the user.".format(user_id))
+    return "Permission denied"
 
 

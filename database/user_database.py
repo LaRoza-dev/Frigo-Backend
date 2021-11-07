@@ -57,13 +57,13 @@ async def retrieve_user(id: str = None, email: str = None) -> dict:
 
 # Update -----------------------------------------------
 # Update custom ingrediens of user with matching id
-async def update_user_custom_ingredient(id: str, data: list):
+async def update_user_wishlist(id: str, data: list):
     user = await user_collection.find_one({"_id": ObjectId(id)})
     for k, v in list(data.items()):
         if v is None:
             del data[k]
     if user:
-        data = {"custom_ingredients": data}
+        data = {"wishlist": data}
         user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
         return True
 
@@ -78,7 +78,6 @@ async def update_user_fridge(id: str, data: list):
                 del data[k]
         user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
         return True
-
 
 # Udate User data of user with matching id
 async def update_user_data(id: str, data: dict):
