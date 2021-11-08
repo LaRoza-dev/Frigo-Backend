@@ -59,11 +59,11 @@ async def retrieve_user(id: str = None, email: str = None) -> dict:
 # Update custom ingrediens of user with matching id
 async def update_user_wishlist(id: str, data: list):
     user = await user_collection.find_one({"_id": ObjectId(id)})
-    for k, v in list(data.items()):
-        if v is None:
-            del data[k]
     if user:
         data = {"wishlist": data}
+        for k, v in list(data.items()):
+            if v is None:
+                del data[k]
         user_collection.update_one({"_id": ObjectId(id)}, {"$set": data})
         return True
 
