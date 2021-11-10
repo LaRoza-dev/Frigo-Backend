@@ -24,24 +24,27 @@ recipe_collection = database.get_collection("recipes_collection")
 
 # ADD -------------------------------------------------------------------------------
 # Retrieve all recipes present in the database
-async def retrieve_recipes(user_id, pageNumber: int, nPerPage: int, is_admin=None,name=''):
+async def retrieve_recipes(user_id, pageNumber: int, nPerPage: int, is_admin=None,name='',sort='name'):
     recipes = []
     if is_admin:
-        # total_number = await recipe_collection.count_documents({})
-        async for recipe in recipe_collection.find({}).sort("name"):
+        async for recipe in recipe_collection.find({}):
             recipes.append(recipe_helper(recipe))
 
         recipes = list(filter(lambda x: name in x["name"] , recipes))
         total_number = len(recipes)
+        if sort =='star':
+            recipes = sorted(recipes, key=itemgetter('stars'),reverse=True)
         recipes = recipes[pageNumber*nPerPage:pageNumber*nPerPage+nPerPage]
     else:
-        # recipe_col = recipe_collection.find({"$or": [{"user_id": user_id}, {"user_id": "1"}]})
-        # total_number = await recipe_collection.count_documents({"$or": [{"user_id": user_id}, {"user_id": "1"}]})
-        async for recipe in recipe_collection.find({"$or": [{"user_id": user_id}, {"user_id": "1"}]}).sort("name"):
+        async for recipe in recipe_collection.find({"$or": [{"user_id": user_id}, {"user_id": "1"}]}):
             recipes.append(recipe_helper(recipe))
 
         recipes = list(filter(lambda x: name in x["name"] , recipes))
         total_number = len(recipes)
+        if sort =='name':
+            recipes = sorted(recipes, key=itemgetter('name'))
+        elif sort =='star':
+            recipes = sorted(recipes, key=itemgetter('stars'),reverse=True)
         recipes = recipes[pageNumber*nPerPage:pageNumber*nPerPage+nPerPage]
     return recipes, total_number
 
@@ -55,7 +58,7 @@ async def add_recipe(recipe_data: dict) -> dict:
 
 # Get -------------------------------------------------------------------------------
 # Retrieve all recipes present in the database which has ingredient list
-async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: int, is_admin=None, query: list = None,name=''):
+async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: int, is_admin=None, query: list = None,name='',sort='ing_count'):
     recipes = []
     queryRE = list(map(lambda recipe: re.compile(
         f"^.*{recipe}.*$", re.IGNORECASE), query))
@@ -74,10 +77,14 @@ async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: in
             #Remove dublicates
             ings = list(dict.fromkeys(ings))
             recipe["finded_ing_count"] = len(ings)
-        recipes.sort(key=itemgetter('finded_ing_count'),reverse=True)
-        
         recipes = list(filter(lambda x: name in x["name"] , recipes))
         total_number = len(recipes)
+        if sort =='star':
+            recipes = sorted(recipes, key=itemgetter('stars'),reverse=True)
+        elif sort =='name':
+            recipes = sorted(recipes, key=itemgetter('name'))
+        elif sort =='ing_count':
+            recipes.sort(key=itemgetter('finded_ing_count'),reverse=True)
         recipes = recipes[pageNumber*nPerPage:pageNumber*nPerPage+nPerPage]
 
     else:
@@ -102,10 +109,15 @@ async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: in
             #Remove dublicates
             ings = list(dict.fromkeys(ings))
             recipe["finded_ing_count"] = len(ings)
-        recipes.sort(key=itemgetter('finded_ing_count'),reverse=True)
 
         recipes = list(filter(lambda x: name in x["name"] , recipes))
         total_number = len(recipes)
+        if sort =='star':
+            recipes = sorted(recipes, key=itemgetter('stars'),reverse=True)
+        elif sort =='name':
+            recipes = sorted(recipes, key=itemgetter('name'))
+        elif sort =='ing_count':
+            recipes.sort(key=itemgetter('finded_ing_count'),reverse=True)
         recipes = recipes[pageNumber*nPerPage:pageNumber*nPerPage+nPerPage]
     return recipes, total_number
 
