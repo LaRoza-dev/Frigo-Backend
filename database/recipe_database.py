@@ -67,16 +67,18 @@ async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: in
         async for recipe in recipe_collection.find({"ingredients": {"$in": queryRE}}):
             recipes.append(recipe_helper(recipe))
         
-        #For sorting by ingredient count
+        #For getting Ing count
         for recipe in recipes:
             ings =[]
             for q in query:
-                for ing in recipe["ingredients"]:
+                for index,ing in enumerate(recipe["ingredients"]):
                     if re.findall(f"^.*{q}.*$", ing):
-                        ings.append(q)
-            #Remove dublicates
+                        ings.append(index)
+            #Ings indexes and count
             ings = list(dict.fromkeys(ings))
             recipe["finded_ing_count"] = len(ings)
+            recipe["finded_ing_index"] = ings
+
         recipes = list(filter(lambda x: name in x["name"] , recipes))
         total_number = len(recipes)
         if sort =='star':
@@ -99,16 +101,17 @@ async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: in
         }):
             recipes.append(recipe_helper(recipe))
 
-        #For sorting by ingredient count
+        #For getting Ing count
         for recipe in recipes:
             ings =[]
             for q in query:
-                for ing in recipe["ingredients"]:
+                for index,ing in enumerate(recipe["ingredients"]):
                     if re.findall(f"^.*{q}.*$", ing):
-                        ings.append(q)
-            #Remove dublicates
+                        ings.append(index)
+            #Ings indexes and count
             ings = list(dict.fromkeys(ings))
             recipe["finded_ing_count"] = len(ings)
+            recipe["finded_ing_index"] = ings
 
         recipes = list(filter(lambda x: name in x["name"] , recipes))
         total_number = len(recipes)
