@@ -30,7 +30,7 @@ async def retrieve_recipes(user_id, pageNumber: int, nPerPage: int, is_admin=Non
         async for recipe in recipe_collection.find({}):
             recipes.append(recipe_helper(recipe))
 
-        recipes = list(filter(lambda x: name in x["name"] , recipes))
+        recipes = list(filter(lambda x: re.search(f"^.*{name}.*$",x["name"], re.IGNORECASE) , recipes))
         total_number = len(recipes)
         if sort =='star':
             recipes = sorted(recipes, key=itemgetter('stars'),reverse=True)
@@ -39,7 +39,7 @@ async def retrieve_recipes(user_id, pageNumber: int, nPerPage: int, is_admin=Non
         async for recipe in recipe_collection.find({"$or": [{"user_id": user_id}, {"user_id": "1"}]}):
             recipes.append(recipe_helper(recipe))
 
-        recipes = list(filter(lambda x: name in x["name"] , recipes))
+        recipes = list(filter(lambda x: re.search(f"^.*{name}.*$",x["name"], re.IGNORECASE) , recipes))
         total_number = len(recipes)
         if sort =='name':
             recipes = sorted(recipes, key=itemgetter('name'))
@@ -79,7 +79,7 @@ async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: in
             recipe["finded_ing_count"] = len(ings)
             recipe["finded_ing_index"] = ings
 
-        recipes = list(filter(lambda x: name in x["name"] , recipes))
+        recipes = list(filter(lambda x: re.search(f"^.*{name}.*$",x["name"], re.IGNORECASE) , recipes))
         total_number = len(recipes)
         if sort =='star':
             recipes = sorted(recipes, key=itemgetter('stars'),reverse=True)
@@ -113,7 +113,7 @@ async def retrieve_recipes_by_ingredients(user_id, pageNumber: int, nPerPage: in
             recipe["finded_ing_count"] = len(ings)
             recipe["finded_ing_index"] = ings
 
-        recipes = list(filter(lambda x: name in x["name"] , recipes))
+        recipes = list(filter(lambda x: re.search(f"^.*{name}.*$",x["name"], re.IGNORECASE) , recipes))
         total_number = len(recipes)
         if sort =='star':
             recipes = sorted(recipes, key=itemgetter('stars'),reverse=True)
