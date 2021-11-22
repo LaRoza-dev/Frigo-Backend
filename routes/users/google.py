@@ -27,7 +27,7 @@ async def homepage(token: str = Body(...)):
         if (db_user):
             return token_response(token)
         sign_user = {"fullname": user["fullname"],
-                     "email": user["email"], "is_admin": False}
+                     "email": user["email"],"fridge":[],"wishlist":[], "is_admin": False}
         sign_user = jsonable_encoder(sign_user)
         new_user = await add_user(sign_user)
         new_user.update(token_response(token))
