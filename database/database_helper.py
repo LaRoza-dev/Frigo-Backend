@@ -27,8 +27,8 @@ def user_helper(user) -> dict:
         "is_admin":user.get('is_admin'),
         "fridge":user.get('fridge') or [],
         "wishlist":user.get('wishlist') or [],
-        "birthdate":user.get('birthdate') or '',
-        "gender":user.get('gender') or ''
+        "birthdate":user.get('birthdate') or None,
+        "gender":user.get('gender') or None
         
     }
 
