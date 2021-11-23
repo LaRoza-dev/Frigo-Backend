@@ -22,10 +22,13 @@ def recipe_helper(recipe) -> dict:
 def user_helper(user) -> dict:
     return {
         "id": str(user['_id']),
-        "fullname": user['fullname'],
-        "email": user['email'],
-        "is_admin":user['is_admin'],
-        "fridge":user['fridge'],
-        "wishlist":user['wishlist']
+        "fullname": user.get('fullname'),
+        "email": user.get('email'),
+        "is_admin":user.get('is_admin'),
+        "fridge":user.get('fridge') or '',
+        "wishlist":user.get('wishlist') or '',
+        "birthdate":user.get('birthdate') or '',
+        "gender":user.get('gender') or ''
+        
     }
 
