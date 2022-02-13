@@ -1,1 +1,1 @@
-# this projects uses FastAPI 
+# Frigo Backend with FastAPI
