@@ -11,6 +11,8 @@ class UserModel(BaseModel):
     is_admin: bool=False
     wishlist: Optional[list] = []
     fridge:Optional[list]=[]
+    birthdate:Optional[str]=None
+    gender:Optional[str]=None
     
 
     class Config:
@@ -43,6 +45,8 @@ class UpdateUserModel(BaseModel):
     email: Optional[EmailStr]
     password: Optional[str]
     is_admin: Optional[bool]
+    birthdate:Optional[str]
+    gender:Optional[str]
 
     class Config:
         schema_extra = {

@@ -50,11 +50,11 @@ async def add_recipe_data(recipe: RecipeSchema = Body(...), authorization: Optio
 # GET -------------------------------------------------------------------------------
 # Get all recipes
 @recipe_router.get("/", response_description="Recipes retrieved")
-async def get_recipes(authorization: Optional[str] = Header(None), pageNumber: int = 0, nPerPage: int = 10,name:Optional[str]=''):
+async def get_recipes(authorization: Optional[str] = Header(None), pageNumber: int = 0, nPerPage: int = 10,name:Optional[str]='',sort:Optional[str]='name'):
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
     user_id = (await retrieve_user(email=token_data['email']))['id']
-    recipes,total_number = await retrieve_recipes(user_id, pageNumber, nPerPage, is_admin,name)
+    recipes,total_number = await retrieve_recipes(user_id, pageNumber, nPerPage, is_admin,name,sort)
     if recipes:
         return ResponseModel(recipes, "Recipes data retrieved successfully",total_number)
     return ResponseModel(recipes, "Empty list returned",total_number)
@@ -62,11 +62,11 @@ async def get_recipes(authorization: Optional[str] = Header(None), pageNumber: i
 
 # Get recipes with matching list
 @recipe_router.post("/search", response_description="Recipes retrieved")
-async def get_recipes_by_ingredients(query: list = Body(...), authorization: Optional[str] = Header(None), pageNumber: int = 0, nPerPage: int = 10,name:Optional[str]=''):
+async def get_recipes_by_ingredients(query: list = Body(...), authorization: Optional[str] = Header(None), pageNumber: int = 0, nPerPage: int = 10,name:Optional[str]='',sort:Optional[str]='ing_count'):
     token_data = decodeJWT(authorization.split(' ')[1])
     is_admin = token_data['is_admin']
     user_id = (await retrieve_user(email=token_data['email']))['id']
-    recipes,total_number = await retrieve_recipes_by_ingredients(user_id, pageNumber, nPerPage, is_admin, query,name)
+    recipes,total_number = await retrieve_recipes_by_ingredients(user_id, pageNumber, nPerPage, is_admin, query,name,sort)
     if recipes:
         return ResponseModel(recipes, "Recipes data retrieved successfully",total_number)
     return ResponseModel(recipes, "Empty list returned",total_number)
